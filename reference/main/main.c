@@ -13,7 +13,10 @@ int main(void) {
     for (int i = 0; i < 10; i++)
         printf("0x%016lx\n", xoroshiro128plus_next(&xoro));
     
-    fxpnt_cfg_t cfg = fxpnt_cfg(8, 16);
+    fxpnt_cfg_t *cfg = fxpnt_cfg(8, 16);
+    fxpnt_t x = fxpnt_from_int(cfg, 5);
+    printf("%f\n", fxpnt_to_double(cfg, x));
+    fxpnt_free(cfg);
     
     return 0;
 }

@@ -6,8 +6,6 @@ static inline uint64_t rotl(const uint64_t x, int k) {
 	return (x << k) | (x >> (64 - k));
 }
 
-// static uint64_t s[2]; // xoroshiro128+ state
-
 void xoroshiro128plus_jump(xoroshiro128plus_t *state) {
 	static const uint64_t JUMP[] = { 0xdf900294d8f554a5, 0x170865df4b3201fc };
 
@@ -43,8 +41,6 @@ void xoroshiro128plus_init(xoroshiro128plus_t *state, uint64_t seed) {
     state->s[0] = splitmix64_next(state);
     state->s[1] = splitmix64_next(state);
 }
-
-// static uint64_t x; // splitmix64 state
 
 uint64_t splitmix64_next(xoroshiro128plus_t *state) {
 	uint64_t z = (state->x += 0x9e3779b97f4a7c15);
