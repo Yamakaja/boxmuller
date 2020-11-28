@@ -134,7 +134,7 @@ Suite *make_fxpnt_arith_suite(void) {
     TCase *tc_core;
 
     s = suite_create("Fixed Point Simple Arithmetic Suite");
-    tc_core = tcase_create("Test Cases with Setup and Teardown");
+    tc_core = tcase_create("Test Cases");
 
     tcase_add_checked_fixture(tc_core, setup, teardown);
 
@@ -161,7 +161,7 @@ int main(void) {
     int number_failed = 0;
     SRunner *sr = srunner_create(make_fxpnt_arith_suite());
     srunner_set_fork_status(sr, CK_NOFORK);
-    srunner_set_log(sr, "test.log");
+    srunner_set_log(sr, "test_fxpnt.log");
     srunner_run_all(sr, CK_VERBOSE);
 
     number_failed = srunner_ntests_failed(sr);
