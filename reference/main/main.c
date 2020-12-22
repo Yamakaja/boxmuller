@@ -131,18 +131,10 @@ void gaussian(uint64_t rand, fxpnt_cfg_t *cfg, fxpnt_t *out) {
         g_0 = -y_g_a;
         g_1 = y_g_b;
         break;
-    default:
-        printf(__FILE__ ":__LINE__: Encountered quadrant < 0 or > 3?! quad = %d\n", quad);
-        exit(1);
     }
     
     out[0] = fxpnt_to_fxpnt(sqrt_pp->cfg, fxpnt_mult(cos_pp->cfg, f, g_0), cfg);
     out[1] = fxpnt_to_fxpnt(sqrt_pp->cfg, fxpnt_mult(cos_pp->cfg, f, g_1), cfg);
-}
-
-void get_random(FILE *input, uint64_t *dest, size_t count) {
-    for (size_t r = 0; r < count;)
-        r += fread(&dest[r], sizeof(uint64_t), count - r, input);
 }
 
 int main(int argc, char *argv[]) {
@@ -158,12 +150,6 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    FILE *urandom = fopen("/dev/urandom", "rb");
-    if (!urandom && errno) {
-        printf("%s: Failed to open /dev/urandom: %s\n", argv[0], strerror(errno));
-        return EXIT_FAILURE;
-    }
-    
     int max_iterations;
     if (sscanf(argv[2], "%d", &max_iterations) < 1) {
         printf("%s: Invalid argument, failed to interpret \"%s\" as int!\n", argv[0], argv[2]);
@@ -179,15 +165,14 @@ int main(int argc, char *argv[]) {
     fxpnt_t gaussians[2];
 
     double buffer[1024];
-    uint64_t rand_buffer[512];
 
     for (int i = 0; i < max_iterations; i++) {
-        get_random(urandom, rand_buffer, sizeof(rand_buffer)/sizeof(*rand_buffer));
-        for (size_t j = 0; j < (sizeof(buffer) / sizeof(*buffer)) / 2; j++) {
+        for (size_t j = 0; j < (sizeof(buffer) / sizeof(*buffer));) {
             uint64_t u = xoroshiro128plus_next(&xoro);
             gaussian(u, cfg, gaussians);
-            buffer[2*j] = fxpnt_to_double(cfg, gaussians[0]);
-            buffer[2*j+1] = fxpnt_to_double(cfg, gaussians[1]);
+            
+            buffer[j++] = fxpnt_to_double(cfg, gaussians[0]);
+            buffer[j++] = fxpnt_to_double(cfg, gaussians[1]);
         }
 
         for (size_t w = 0; w < sizeof(buffer) / sizeof(*buffer);)
@@ -195,7 +180,6 @@ int main(int argc, char *argv[]) {
     }
     
     fclose(outfile);
-    fclose(urandom);
 
     teardown();
     fxpnt_free(cfg);
