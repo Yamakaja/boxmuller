@@ -9,7 +9,7 @@ fxpnt_pp_t *fxpnt_pp_new(const fxpnt_cfg_t *cfg, int log2_n, size_t degree) {
     pp->log2_n = log2_n;
     pp->n = 1UL << log2_n;
     pp->degree = degree;
-    pp->table = calloc(pp->n * degree, sizeof(fxpnt_t));
+    pp->table = calloc(pp->n * (degree + 1), sizeof(fxpnt_t));
 
     return pp;
 }
@@ -25,7 +25,7 @@ void fxpnt_pp_free(fxpnt_pp_t *pp) {
 }
 
 fxpnt_t *fxpnt_pp_get_seg(fxpnt_pp_t *pp, size_t n) {
-    return &(pp->table[n * pp->degree]);
+    return &(pp->table[n * (pp->degree + 1)]);
 }
 
 fxpnt_t fxpnt_pp_eval(fxpnt_pp_t *pp, fxpnt_t x) {

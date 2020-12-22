@@ -129,6 +129,28 @@ START_TEST(test_fxpnt_saturation) {
 }
 END_TEST
 
+START_TEST(test_fxpnt_small_neg_mult) {
+    double a_ = -0.68584896670654416;
+    double b_ = 1.3601555617060512;
+    fxpnt_t a = fxpnt_from_double(cfg, a_);
+    fxpnt_t b = fxpnt_from_double(cfg, b_);
+
+    ck_assert_double_eq_tol(fxpnt_to_double(cfg, fxpnt_mult(cfg, a, b)), a_ * b_, 1.0 / (1 << (cfg->n_f-1)));
+    ck_assert_double_eq_tol(fxpnt_to_double(cfg, fxpnt_mult(cfg, b, a)), a_ * b_, 1.0 / (1 << (cfg->n_f-1)));
+}
+END_TEST
+
+START_TEST(test_fxpnt_small_mult) {
+    double a_ = 0.99886951129883528;
+    double b_ = 2.139543395023793;
+    fxpnt_t a = fxpnt_from_double(cfg, a_);
+    fxpnt_t b = fxpnt_from_double(cfg, b_);
+
+    ck_assert_double_eq_tol(fxpnt_to_double(cfg, fxpnt_mult(cfg, a, b)), a_ * b_, 1.0 / (1 << (cfg->n_f-2)));
+    ck_assert_double_eq_tol(fxpnt_to_double(cfg, fxpnt_mult(cfg, b, a)), a_ * b_, 1.0 / (1 << (cfg->n_f-2)));
+}
+END_TEST
+
 Suite *make_fxpnt_arith_suite(void) {
     Suite *s;
     TCase *tc_core;
@@ -151,6 +173,8 @@ Suite *make_fxpnt_arith_suite(void) {
     
     tcase_add_test(tc_core, test_fxpnt_double_conversion);
     tcase_add_test(tc_core, test_fxpnt_saturation);
+    tcase_add_test(tc_core, test_fxpnt_small_mult);
+    tcase_add_test(tc_core, test_fxpnt_small_neg_mult);
 
     suite_add_tcase(s, tc_core);
 

@@ -39,16 +39,26 @@ void fxpnt_free(fxpnt_cfg_t *cfg) {
 }
 
 fxpnt_t fxpnt_mult(fxpnt_cfg_t *cfg, fxpnt_t a, fxpnt_t b) {
-    // return (a * b) >> (cfg->n_f);
-    int64_t a_i = FXPNT_INT(cfg, a);
+    bool sign_a = a < 0;
+    bool sign_b = b < 0;
+
+    if (sign_a)
+        a = -a;
+    if (sign_b)
+        b = -b;
+
+    bool sign = sign_a ^ sign_b;
+    
+    uint64_t a_i = FXPNT_INT(cfg, a);
     uint64_t a_f = FXPNT_FRAC(cfg, a);
-    int64_t b_i = FXPNT_INT(cfg, b);
+    uint64_t b_i = FXPNT_INT(cfg, b);
     uint64_t b_f = FXPNT_FRAC(cfg, b);
 
-    int64_t z_i = a_i * b_i + ((a_i * b_f + b_i * a_f) >> cfg->n_f);
     uint64_t z_f = (a_f * b_f >> cfg->n_f) + a_i * b_f + b_i * a_f;
+    uint64_t z_i = a_i * b_i + (z_f >> cfg->n_f);
 
-    return fxpnt_new(cfg, z_i, z_f);
+    fxpnt_t ret = fxpnt_new(cfg, z_i, z_f);
+    return sign ? -ret : ret;
 }
 
 double fxpnt_to_double(fxpnt_cfg_t *cfg, fxpnt_t x) {
