@@ -1,14 +1,23 @@
+--------------------------------------------------------------------------------
+--! @file
+--! @brief Box-Mueller transformator
+--! @author David Winter (adaption of the public domain XOROSHIRO128+)
+--! 
+--! At the time of writing this documentation, this transform had a throughput
+--! of one output (i.e. two normal variables) per clock cycle, and a pipeline
+--! depth of 29 clock cycles.
+--------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 entity boxmueller is
     port ( 
-        clk  : in std_logic;
-        rstn : in std_logic;
-        u    : in std_logic_vector(95 downto 0);
-        x_0  : out signed(15 downto 0);
-        x_1  : out signed(15 downto 0)
+        clk  : in std_logic;                         --! Data clock
+        rstn : in std_logic;                         --! Negative reset
+        u    : in std_logic_vector(95 downto 0);     --! Uniform random input
+        x_0  : out signed(15 downto 0);              --! First output normal variable
+        x_1  : out signed(15 downto 0)               --! Second output normal variable
     );
 end boxmueller;
 
