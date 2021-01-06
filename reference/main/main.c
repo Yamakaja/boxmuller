@@ -37,7 +37,7 @@ fxpnt_t fxpnt_sqrt2, fxpnt_ln2;
 void setup(void) {
     fxpnt_cfg_t *cfg = fxpnt_cfg(8, 32);
     
-    log_pp = fxpnt_pp_new(cfg, 4, 2); // 2^4 == 16 segments, degree 2
+    log_pp = fxpnt_pp_new(cfg, 8, 2); // 2^4 == 16 segments, degree 2
     memcpy(log_pp->table, FXPNT_PP_LOG, sizeof(FXPNT_PP_LOG));
 
     sqrt_pp = fxpnt_pp_new(cfg, 4, 2);
@@ -63,8 +63,10 @@ void teardown(void) {
 }
 
 void gaussian(uint64_t rand, fxpnt_cfg_t *cfg, fxpnt_t *out) {
-    uint64_t u_0 = 0xFFFFFFFFFFFFL & rand; // 48 bit uniform random
-    uint64_t u_1 = 0xFFFFL & (rand >> 48); // 16 bit uniform random
+    uint64_t u_0 = 0xFFFFFFFFFFFFUL & rand; // 48 bit uniform random
+    uint64_t u_1 = 0xFFFFUL & (rand >> 48); // 16 bit uniform random
+
+    u_0 &= 0xFFFFUL;
 
     //
     // Operation: e = -2 * ln(u_0)  
@@ -72,7 +74,7 @@ void gaussian(uint64_t rand, fxpnt_cfg_t *cfg, fxpnt_t *out) {
     
     // Calculate mantissa of u_0, with implicit leading 1-bit
     int exp_e = count_leading_zeros(48, u_0) + 1;
-    uint64_t x_e = 0xFFFFFFFFFFFF & (u_0 << exp_e);
+    uint64_t x_e = 0xFFFFFFFFFFFFUL & (u_0 << exp_e);
 
     // Shift "mantissa" to fill fraction
     x_e = x_e >> (48 - log_pp->cfg->n_f);
@@ -138,9 +140,9 @@ void gaussian(uint64_t rand, fxpnt_cfg_t *cfg, fxpnt_t *out) {
 }
 
 int main(int argc, char *argv[]) {
-    if (argc < 3) {
+    if (argc < 4) {
         printf("%s: Not enough arguments!\n", argv[0]);
-        printf("Usage: %s <OUTFILE> <MAX_ITERATIONS>\n", argv[0]);
+        printf("Usage: %s <OUTFILE> <SEED> <MAX_ITERATIONS>\n", argv[0]);
         return 1;
     }
     
@@ -150,14 +152,24 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
+    uint64_t seed;
+    size_t seed_jumps = 0;
+    if (sscanf(argv[2], "%lx:%ld", &seed, &seed_jumps) < 1) {
+        printf("%s: Invalid argument, failed to interpret \"%s\" as hex-long!\n", argv[0], argv[2]);
+        return EXIT_FAILURE;
+    }
+
     int max_iterations;
-    if (sscanf(argv[2], "%d", &max_iterations) < 1) {
-        printf("%s: Invalid argument, failed to interpret \"%s\" as int!\n", argv[0], argv[2]);
+    if (sscanf(argv[3], "%d", &max_iterations) < 1) {
+        printf("%s: Invalid argument, failed to interpret \"%s\" as int!\n", argv[0], argv[3]);
         return EXIT_FAILURE;
     }
     
     xoroshiro128plus_t xoro;
-    xoroshiro128plus_init(&xoro, 0xcafebabe8badbeef);
+    xoroshiro128plus_init(&xoro, seed);
+
+    for (size_t i = 0; i < seed_jumps; i++)
+        xoroshiro128plus_jump(&xoro);
 
     setup();
 
@@ -171,8 +183,24 @@ int main(int argc, char *argv[]) {
             uint64_t u = xoroshiro128plus_next(&xoro);
             gaussian(u, cfg, gaussians);
             
-            buffer[j++] = fxpnt_to_double(cfg, gaussians[0]);
-            buffer[j++] = fxpnt_to_double(cfg, gaussians[1]);
+            buffer[j] = fxpnt_to_double(cfg, gaussians[0]);
+            if (buffer[j] > 7)
+                j++;
+            else if (buffer[j] < -7) {
+                buffer[j] = -buffer[j];
+                j++;
+            }
+
+            if (j >= (sizeof(buffer) / sizeof(*buffer)))
+                break;
+
+            buffer[j] = fxpnt_to_double(cfg, gaussians[1]);
+            if (buffer[j] > 7)
+                j++;
+            else if (buffer[j] < -7) {
+                buffer[j] = -buffer[j];
+                j++;
+            }
         }
 
         for (size_t w = 0; w < sizeof(buffer) / sizeof(*buffer);)
