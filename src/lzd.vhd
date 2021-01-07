@@ -1,42 +1,70 @@
 --------------------------------------------------------------------------------
 --! @file
 --! @brief Leading Zero Detection
+--! @author David Winter
 --------------------------------------------------------------------------------
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use ieee.numeric_std.all;
 
+--! This package defines the lzd helper procedures that can be used
+--! to synthesize the final lzd logic. All of these procedures are of
+--! a purely combinatorial nature.
 package lzd_pkg is
-
-  procedure lzdp_2 (
-    signal l_din : in std_logic_vector(1 downto 0);
-    variable l_p  : out std_logic_vector(0 downto 0);
-    variable l_v  : out std_logic);
+  
+    --! Two-bit leading zero detector construction helper
+    --! \param l_din    Input Data
+    --! \param l_p      Leading zero count
+    --! \param l_v      Leading zero count valid bit
+    procedure lzdp_2 (
+        signal l_din : in std_logic_vector(1 downto 0);
+        variable l_p  : out std_logic_vector(0 downto 0);
+        variable l_v  : out std_logic);
  
-  procedure lzdp_4 (
-    signal l_din : in std_logic_vector(3 downto 0);
-    variable l_p : out std_logic_vector(1 downto 0);
-    variable l_v : out std_logic);
+    --! 4-bit leading zero detector construction helper
+    --! \param l_din    Input Data
+    --! \param l_p      Leading zero count
+    --! \param l_v      Leading zero count valid bit
+    procedure lzdp_4 (
+        signal l_din : in std_logic_vector(3 downto 0);
+        variable l_p : out std_logic_vector(1 downto 0);
+        variable l_v : out std_logic);
     
-  procedure lzdp_8 (
-    signal l_din : in std_logic_vector(7 downto 0);
-    variable l_p : out std_logic_vector(2 downto 0);
-    variable l_v : out std_logic);
+    --! 8-bit leading zero detector construction helper
+    --! \param l_din    Input Data
+    --! \param l_p      Leading zero count
+    --! \param l_v      Leading zero count valid bit
+    procedure lzdp_8 (
+        signal l_din : in std_logic_vector(7 downto 0);
+        variable l_p : out std_logic_vector(2 downto 0);
+        variable l_v : out std_logic);
     
-  procedure lzdp_16 (
-    signal l_din : in std_logic_vector(15 downto 0);
-    variable l_p : out std_logic_vector(3 downto 0);
-    variable l_v : out std_logic);
+    --! 16-bit leading zero detector construction helper
+    --! \param l_din    Input Data
+    --! \param l_p      Leading zero count
+    --! \param l_v      Leading zero count valid bit
+    procedure lzdp_16 (
+        signal l_din : in std_logic_vector(15 downto 0);
+        variable l_p : out std_logic_vector(3 downto 0);
+        variable l_v : out std_logic);
     
-  procedure lzdp_32 (
-    signal l_din : in std_logic_vector(31 downto 0);
-    variable l_p : out std_logic_vector(4 downto 0);
-    variable l_v : out std_logic);
+    --! 32-bit leading zero detector construction helper
+    --! \param l_din    Input Data
+    --! \param l_p      Leading zero count
+    --! \param l_v      Leading zero count valid bit
+    procedure lzdp_32 (
+        signal l_din : in std_logic_vector(31 downto 0);
+        variable l_p : out std_logic_vector(4 downto 0);
+        variable l_v : out std_logic);
     
-  procedure lzdp_48 (
-    signal l_din : in std_logic_vector(47 downto 0);
-    variable l_p : out std_logic_vector(5 downto 0);
-    variable l_v : out std_logic);
+    --! 48-bit leading zero detector construction helper
+    --! \param l_din    Input Data
+    --! \param l_p      Leading zero count
+    --! \param l_v      Leading zero count valid bit
+    procedure lzdp_48 (
+        signal l_din : in std_logic_vector(47 downto 0);
+        variable l_p : out std_logic_vector(5 downto 0);
+        variable l_v : out std_logic);
     
 end package lzd_pkg;
 
@@ -66,7 +94,8 @@ package body lzd_pkg is
   procedure lzdp_2 (
     signal l_din : in std_logic_vector(1 downto 0);
     variable l_p  : out std_logic_vector(0 downto 0);
-    variable l_v  : out std_logic) is
+    variable l_v  : out std_logic
+  ) is
   begin
     l_v := l_din(0) or l_din(1);
     l_p(0) := l_din(0) and not l_din(1);
@@ -152,18 +181,26 @@ end lzd_pkg;
 
 
 
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
+--! VHDL standard library
+library ieee;
+--! Logic primitives and vectors
+use ieee.std_logic_1164.all;
+--! Fixed width integer primitives
 use ieee.numeric_std.all;
+--! LZD helper procedures
 use work.lzd_pkg.all;
 
+--! Implements a 32-bit leading zero detector from the lzd-procedures defined in lzd_pkg.
+--!
+--! Throughput: 1 sample/cycle.
+--! Delay:      1 cycle
 entity lzd_32 is
-    port (  clk : in std_logic;
-            rstn : in std_logic;
-            en : in std_logic;
-            din : in std_logic_vector(31 downto 0);
-            p : out unsigned(4 downto 0);
-            v : out std_logic
+    port (  clk : in std_logic;                         --! Input clock
+            rstn : in std_logic;                        --! Inverted reset
+            en : in std_logic;                          --! Clock enable
+            din : in std_logic_vector(31 downto 0);     --! Data input
+            p : out unsigned(4 downto 0);               --! Leading zero count output
+            v : out std_logic                           --! Leading zero count valid bit output
             );
         
 end lzd_32;
@@ -199,17 +236,25 @@ begin
 
 end beh;
 
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
+--! VHDL standard library
+library ieee;
+--! Logic primitives and vectors
+use ieee.std_logic_1164.all;
+--! Fixed width integer primitives
 use ieee.numeric_std.all;
+--! LZD helper procedures
 use work.lzd_pkg.all;
 
+--! Implements a 48-bit leading zero detector from the lzd-procedures defined in lzd_pkg.
+--!
+--! Throughput: 1 sample/cycle.
+--! Delay:      1 cycle
 entity lzd_48 is
-    Port ( clk : in STD_LOGIC;
-           rstn : in STD_LOGIC;
-           en : in STD_LOGIC;
-           din : in STD_LOGIC_VECTOR (47 downto 0);
-           p : out unsigned (5 downto 0));
+    Port ( clk : in STD_LOGIC;                      --! Input clock
+           rstn : in STD_LOGIC;                     --! Inverted reset
+           en : in STD_LOGIC;                       --! Clock enable
+           din : in STD_LOGIC_VECTOR (47 downto 0); --! Data input
+           p : out unsigned (5 downto 0));          --! Leading zero count output, always valid; = 48 for din = 0.
 end lzd_48;
 
 architecture beh of lzd_48 is

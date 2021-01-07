@@ -145,10 +145,11 @@ begin
         -- wait for 309 ns;
         wait for 9 ns;
         t_en <= '1';
-        -- wait for 10 ns;
-        -- t_en <= '0';
+        wait for 10 ns;
+        t_en <= '0';
+        wait for 1 ns;
         
-        wait for 500 ms;
+        wait for 500 ns;
     --     t_din <= (47 => '1', others => '0');
     --     wait for 22 ns;
     --     

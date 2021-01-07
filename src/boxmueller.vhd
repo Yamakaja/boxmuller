@@ -1,23 +1,30 @@
 --------------------------------------------------------------------------------
 --! @file
 --! @brief Box-Mueller transformator
---! @author David Winter (adaption of the public domain XOROSHIRO128+)
---! 
---! At the time of writing this documentation, this transform had a throughput
---! of one output (i.e. two normal variables) per clock cycle, and a pipeline
---! depth of 29 clock cycles.
+--! @author David Winter
 --------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+--! Implements the box-mueller transformation to create a gaussian distribution
+--! from uniformly distributed bits.
+--! At the time of writing this documentation, this transform had a throughput
+--! of one output (i.e. two normal variables) per clock cycle, and a pipeline
+--! depth of 30 clock cycles.
+--!
+--! For more information on the architecture of this core:
+--! D. -. Lee, J. D. Villasenor, W. Luk and P. H. W. Leong, "A hardware Gaussian
+--! noise generator using the Box-Muller method and its error analysis," in IEEE
+--! Transactions on Computers, vol. 55, no. 6, pp. 659-671, June 2006,
+--! doi: 10.1109/TC.2006.81.
 entity boxmueller is
     port ( 
         clk  : in std_logic;                         --! Data clock
         rstn : in std_logic;                         --! Negative reset
         u    : in std_logic_vector(95 downto 0);     --! Uniform random input
-        x_0  : out signed(15 downto 0);              --! First output normal variable
-        x_1  : out signed(15 downto 0)               --! Second output normal variable
+        x_0  : out signed(15 downto 0);              --! First output normal variable   bit value: (5,11)
+        x_1  : out signed(15 downto 0)               --! Second output normal variable  bit value: (5,11)
     );
 end boxmueller;
 

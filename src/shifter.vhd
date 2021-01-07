@@ -1,19 +1,33 @@
+--------------------------------------------------------------------------------
+--! @file
+--! @brief (Bidirectional) barrel shifters
+--! @author David Winter
+--------------------------------------------------------------------------------
+--! VHDL standard library
 library ieee;
+--! Logic primitives and vectors
 use ieee.std_logic_1164.all;
+--! Fixed width integer primitives
 use ieee.numeric_std.all;
 
+--! The shifter_lr implements a bidirectional barrel shifter,
+--! that shifts left for positive control inputs, and the other
+--! way for negative inputs.
+--!
+--! Throughput: 1 sample/cycle.
+--! Delay:      3 cycles.
 entity shifter_lr is
     generic (
-           DATA_WIDTH    : integer := 16;
-           CONTROL_WIDTH : integer := 5;
-           C_SHIFT       : integer := 0
+           DATA_WIDTH    : integer := 16;                           --! The amount of data that is to be shifted around
+           CONTROL_WIDTH : integer := 5;                            --! The control word width. Note: This is a singed type!
+           C_SHIFT       : integer := 0                             --! Allows c to be divided by powers of two, for positive *and* negative values
            );
-    port ( clk : in STD_LOGIC;
-           rstn : in STD_LOGIC;
-           en : in STD_LOGIC;
-           din : in STD_LOGIC_VECTOR (DATA_WIDTH - 1 downto 0);
-           c : in signed(CONTROL_WIDTH-1 downto 0);
-           dout : out STD_LOGIC_VECTOR (DATA_WIDTH - 1 downto 0));
+    port ( clk : in STD_LOGIC;                                      --! Clock input
+           rstn : in STD_LOGIC;                                     --! Inverted reset
+           en : in STD_LOGIC;                                       --! Clock enable
+           din : in STD_LOGIC_VECTOR (DATA_WIDTH - 1 downto 0);     --! Data input
+           c : in signed(CONTROL_WIDTH-1 downto 0);                 --! Control word input
+           dout : out STD_LOGIC_VECTOR (DATA_WIDTH - 1 downto 0));  --! Data output
 end shifter_lr;
 
 architecture beh of shifter_lr is

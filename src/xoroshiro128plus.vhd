@@ -1,6 +1,7 @@
 --------------------------------------------------------------------------------
 --! @file
 --! @brief XOROSHIRO128+ uniform random number generator
+--! @author David Winter (adaption of the public domain XOROSHIRO128+)
 --------------------------------------------------------------------------------
 
 library ieee;

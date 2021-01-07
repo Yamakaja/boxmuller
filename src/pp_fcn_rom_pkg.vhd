@@ -1,3 +1,13 @@
+--------------------------------------------------------------------------------
+--! @file
+--! @brief Partial Polynomial ROM Data
+--! @author David Winter
+--!
+--! This file stores all the coefficients of the ln/sqrt/sin/cos
+--! polynomial approximations as bit vectors. The coefficients are in little-
+--! endian order, i.e. if degree=2, the structure looks as follows:
+--! vec = [C_2][C_1][C_0]
+--------------------------------------------------------------------------------
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
