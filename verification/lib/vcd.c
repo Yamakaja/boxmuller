@@ -10,7 +10,7 @@
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 
-vcd_t *vcd_open(char *file) {
+vcd_t *vcd_open(char *file, size_t history_length_log) {
 
     FILE *input_file = fopen(file, "r");
     if (!input_file)
@@ -20,6 +20,11 @@ vcd_t *vcd_open(char *file) {
     
     if (!vcd)
         return NULL;
+
+    vcd->history_length_log = history_length_log;
+    vcd->history_length = 1UL << (history_length_log);
+    vcd->history_length_mask = vcd->history_length - 1L;
+    vcd->timeslot_idx = 0L;
 
     vcd->state = HEADER;
     vcd->signals = NULL;
@@ -36,7 +41,7 @@ vcd_t *vcd_open(char *file) {
     vcd->line_n = 0UL;
     vcd->line_idx = 0;
 
-    vcd->time = 0;
+    vcd->time = 0UL;
     return vcd;
 }
 
@@ -49,8 +54,11 @@ void vcd_close(vcd_t *vcd) {
     free(vcd->comment);
     free(vcd->line_buffer);
 
-    for (int i = 0; i < vcd->signal_count; i++)
+    for (int i = 0; i < vcd->signal_count; i++) {
         free(vcd->signals[i].name);
+        free(vcd->signals[i].data);
+        free(vcd->signals[i].valid);
+    }
 
     free(vcd->signals);
 
@@ -64,12 +72,22 @@ ssize_t vcd_next_line(vcd_t *vcd) {
 
 void vcd_add_signal(vcd_t *vcd, char *line) {
     vcd_signal_t *signal = malloc(sizeof(vcd_signal_t));
-    signal->name = malloc(strlen(line));
+    signal->name  = malloc(sizeof(*line) * (strlen(line) + 1));
+    signal->data  = malloc(sizeof(*signal->data) * vcd->history_length);
+    signal->valid = malloc(sizeof(*signal->valid) * vcd->history_length);
+    signal->processed = false;
     char symbol[2];
-    sscanf(line, "var wire %d %s %s $end", &signal->width, symbol, signal->name);
+    sscanf(line, "var wire %d %s %s %*s $end", &signal->width, symbol, signal->name);
+
+    if (signal->width > 64) {
+        fprintf(stderr, "vcd_add_signal: Unsupported signal width > 64!\n");
+        exit(EXIT_FAILURE);
+    }
+
     vcd->lowest_symbol = MIN(vcd->lowest_symbol, symbol[0]);
     vcd->highest_symbol = MAX(vcd->highest_symbol, symbol[0]);
     signal->symbol = symbol[0];
+
 
     signal->next = vcd->signals;
     vcd->signals = signal;
@@ -185,16 +203,12 @@ void vcd_parse_header(vcd_t *vcd) {
 
     vcd_signal_t *signal_block = malloc(sizeof(vcd_signal_t) * range);
 
-    // memcpy(&signal_block[0], vcd->signals, sizeof(vcd_signal_t));
-
-    // for (int i = 1; i < vcd->signal_count; i++)
-    //     memcpy(&signal_block[i], signal_block[i-1].next, sizeof(vcd_signal_t));
-
     vcd_signal_t *next = vcd->signals;
     while (next != NULL) {
         
         size_t idx = (size_t)(next->symbol - vcd->lowest_symbol);
         memcpy(&signal_block[idx], next, sizeof(vcd_signal_t));
+        signal_block[idx].next = NULL;
 
         vcd_signal_t *tmp = next;
         next = next->next;
@@ -204,17 +218,29 @@ void vcd_parse_header(vcd_t *vcd) {
     vcd->signals = signal_block;
 }
 
+size_t vcd_get_data_idx(vcd_t *vcd, ssize_t i) {
+    return vcd->history_length_mask & (vcd->history_length + i + vcd->timeslot_idx);
+}
+
 void vcd_parse_body_line(vcd_t *vcd) {
     char data[64];
     size_t len;
     char *line;
     char symbol;
+    uint64_t new_time;
+    uint64_t *data_ptr;
+    ssize_t data_idx;
+
     switch (vcd->line_buffer[0]) {
         case '$':
             // Ignore
             break;
         case '#':
-            sscanf(vcd->line_buffer + 1, "%lu", &vcd->time);
+            sscanf(vcd->line_buffer + 1, "%lu", &new_time);
+            if (new_time != vcd->time) {
+                vcd->timeslot_idx++;
+                vcd->time = new_time;
+            }
             return;
         case 'b':
             line = vcd->line_buffer;
@@ -223,19 +249,22 @@ void vcd_parse_body_line(vcd_t *vcd) {
             len = strlen(data);
 
             vcd_signal_t *signal = &vcd->signals[(size_t)(symbol - vcd->lowest_symbol)];
-            signal->valid = true;
-            signal->data = 0UL;
+
+            data_idx = vcd_get_data_idx(vcd, 0);
+            signal->valid[data_idx] = true;
+            signal->processed = true;
+
+            data_ptr = &signal->data[data_idx];
+            *data_ptr = 0UL;
 
             for (size_t i = 0; i < len; i++) {                
                 switch (data[i]) {
                     case '0':
-                        signal->data = (signal->data << 1) & (~0x1UL);;
-                        break;
                     case '1':
-                        signal->data = (signal->data << 1) | 0x1UL;
+                        *data_ptr = (*data_ptr << 1) | (data[i] & 0x1);
                         break;
                     default:
-                        signal->valid = false;
+                        signal->valid[data_idx] = false;
                         break;
                 }
             }
@@ -244,12 +273,35 @@ void vcd_parse_body_line(vcd_t *vcd) {
 }
 
 void vcd_next(vcd_t *vcd) {
+    for (int i = 0; i < vcd->signal_count; i++)
+        vcd->signals[i].processed = false;
+
     do {
+
         vcd_parse_body_line(vcd);
         vcd_next_line(vcd);
     } while (!feof(vcd->source) && vcd->line_buffer[0] != '#');
+
+    ssize_t idx = vcd_get_data_idx(vcd, 0);
+    ssize_t old_idx = vcd_get_data_idx(vcd, -1);
+    for (int i = 0; i < vcd->signal_count; i++) {
+        if (!vcd->signals[i].processed)
+            vcd->signals[i].data[idx] = vcd->signals[i].data[old_idx];
+    }
 }
 
 bool vcd_has_next(vcd_t *vcd) {
     return !feof(vcd->source);
+}
+
+vcd_signal_t *vcd_get_signal_by_name(vcd_t *vcd, char *name) {
+    for (int i = 0; i < vcd->signal_count; i++)
+        if (!strcmp(vcd->signals[i].name, name))
+            return &vcd->signals[i];
+    return NULL;
+}
+
+void vcd_skip(vcd_t *vcd, size_t n) {
+    for (size_t i = 0; i < n; i++)
+        vcd_next(vcd);
 }

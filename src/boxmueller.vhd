@@ -138,7 +138,8 @@ architecture beh of boxmueller is
     signal r_f      : signed(5+13-1 downto 0);
     
     -- sin/cos
-    signal r_t_quad : unsigned(1 downto 0);
+    type r_t_quad_t is array(0 to 3) of unsigned(1 downto 0);
+    signal r_t_quad : r_t_quad_t;
     signal w_t_sin  : signed(17 downto 0);
     signal w_t_cos  : signed(17 downto 0);
     signal r_t_g_0  : signed(17 downto 0);
@@ -192,9 +193,13 @@ begin
             
             -- sin/cos
             
-            r_t_quad <= unsigned(r_i_u_1(15 downto 14));
+            r_t_quad(0) <= unsigned(r_i_u_1(15 downto 14));
             
-            quad := to_integer(r_t_quad);
+            for i in 1 to r_t_quad'length-1 loop
+                r_t_quad(i) <= r_t_quad(i-1);
+            end loop;
+            
+            quad := to_integer(r_t_quad(3));
             case quad is
                 when 0 =>
                     r_t_g_0 <= w_t_sin;

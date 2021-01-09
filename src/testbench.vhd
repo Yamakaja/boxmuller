@@ -109,6 +109,10 @@ begin
     t_din(48 downto 24) <= (others => '0');
     t_din(23 downto 0) <= t_dout(23 downto 0);
     
+    -- t_din(48 downto 1) <= std_logic_vector(to_unsigned(16#3e#, 48));
+    -- t_din(64 downto 49) <= std_logic_vector(to_unsigned(16#f884#, 16));
+    -- t_din(95 downto 65) <= std_logic_vector(to_unsigned(16#7e6b6a63#, 31));
+    
     rand_0 : xoroshiro128plus
         generic map (
             seed_1 => X"1976c51ab89a5886",
