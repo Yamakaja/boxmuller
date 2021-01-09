@@ -55,10 +55,10 @@ int main(int argc, char *argv[]) {
 
     vcd_parse_header(vcd);
 
-    puts("Signals:");
-    for (int i = 0; i < vcd->signal_count; i++)
-        printf(" * %s, width=%d, symbol=%c\n",
-               vcd->signals[i].name, vcd->signals[i].width, vcd->signals[i].symbol);
+    // puts("Signals:");
+    // for (int i = 0; i < vcd->signal_count; i++)
+    //     printf(" * %s, width=%d, symbol=%c\n",
+    //            vcd->signals[i].name, vcd->signals[i].width, vcd->signals[i].symbol);
 
     vcd_signal_t *r_i_u_0 = vcd_get_signal_by_name(vcd, "r_i_u_0");
     vcd_signal_t *r_i_u_1 = vcd_get_signal_by_name(vcd, "r_i_u_1");
@@ -77,6 +77,20 @@ int main(int argc, char *argv[]) {
 
     vcd_skip(vcd, 30);
 
+    double ulp = 1.0 / (1 << 11);
+
+    FILE *dout;
+    double dout_buffer[1024];
+    size_t dout_i = 0;
+    if (argc == 3) {
+        dout = fopen(argv[2], "w");
+        if (!dout) {
+            perror("Failed to open output file");
+            return EXIT_FAILURE;
+        }
+    }
+
+
     while (vcd_has_next(vcd)) {
         vcd_next(vcd);
 
@@ -88,14 +102,27 @@ int main(int argc, char *argv[]) {
         double x[2];
         gaussian(r_i_u_0->data[i_u_0], r_i_u_1->data[i_u_1], r_i_u_2->data[i_u_2], x);
 
+        if (dout) {
+            dout_buffer[dout_i++] = x[0];
+            dout_buffer[dout_i++] = x[1];
+
+            if (dout_i >= sizeof(dout_buffer) / sizeof(*dout_buffer)) {
+                fwrite(dout_buffer, sizeof(*dout_buffer), dout_i, dout);
+                dout_i = 0;
+            }
+        }
+
         double x_[2] = { signed_to_double(t_x_0->data[i], t_x_0->width) * 0.00048828125, signed_to_double(t_x_1->data[i], t_x_1->width) * .00048828125 };
 
-        printf("%8.5f x_0=(%8.5f | %8.5f) x_1=(%8.5f | %8.5f) t=%12ld r_i_u_0=0x%016lx r_i_u_1=0x%016lx r_i_u_2=0x%016lx\n",
-            fabs(MAX(x[0] - x_[0], x[1] - x_[1])),
-            x[0], x_[0], x[1], x_[1],
-            vcd->time,
-            r_i_u_0->data[i_u_0], r_i_u_1->data[i_u_1], r_i_u_2->data[i_u_2]
-            );
+        double max_error = fabs(MAX(x[0] - x_[0], x[1] - x_[1]));
+
+        if (max_error > 1.5 * ulp)
+            printf("%8.5f x_0=(%8.5f | %8.5f) x_1=(%8.5f | %8.5f) t=%12ld r_i_u_0=0x%016lx r_i_u_1=0x%016lx r_i_u_2=0x%016lx\n",
+                max_error,
+                x[0], x_[0], x[1], x_[1],
+                vcd->time,
+                r_i_u_0->data[i_u_0], r_i_u_1->data[i_u_1], r_i_u_2->data[i_u_2]
+                );
 
         // for (int j = 0; j < vcd->signal_count; j++) {
         //     vcd_signal_t *signal = &vcd->signals[j];
@@ -104,7 +131,12 @@ int main(int argc, char *argv[]) {
         //     else
         //         printf("%s=0xXXXXXXXXXXXXXXXX ", signal->name);
         // }
-        puts("");
+    }
+
+
+    if (dout) {
+        fwrite(dout_buffer, sizeof(*dout_buffer), dout_i, dout);
+        fclose(dout);
     }
     
 

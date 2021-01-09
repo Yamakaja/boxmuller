@@ -1,2 +1,2 @@
-add_executable(validate_trace validate_trace.c)
-target_link_libraries(validate_trace libvcd m)
+add_executable(verify_trace verify_trace.c)
+target_link_libraries(verify_trace libvcd m)
