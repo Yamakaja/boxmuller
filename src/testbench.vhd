@@ -12,6 +12,7 @@ architecture beh of testbench is
     signal t_en : std_logic := '0';
     
     signal t_dout : std_logic_vector(127 downto 0);
+    signal t_din : std_logic_vector(95 downto 0);
     
     signal t_x_0 : signed(15 downto 0);
     signal t_x_1 : signed(15 downto 0);
@@ -103,6 +104,10 @@ architecture beh of testbench is
     end component;
         
 begin
+
+    t_din(95 downto 49) <= t_dout(95 downto 49);
+    t_din(48 downto 24) <= (others => '0');
+    t_din(23 downto 0) <= t_dout(23 downto 0);
     
     rand_0 : xoroshiro128plus
         generic map (
@@ -132,7 +137,7 @@ begin
         port map ( 
             clk  => t_clk,
             rstn => t_rstn,
-            u    => t_dout(95 downto 0),
+            u    => t_din,
             x_0  => t_x_0,
             x_1  => t_x_1
         );
@@ -145,11 +150,11 @@ begin
         -- wait for 309 ns;
         wait for 9 ns;
         t_en <= '1';
-        wait for 10 ns;
-        t_en <= '0';
-        wait for 1 ns;
+        -- wait for 10 ns;
+        -- t_en <= '0';
+        -- wait for 1 ns;
         
-        wait for 500 ns;
+        wait for 500 ms;
     --     t_din <= (47 => '1', others => '0');
     --     wait for 22 ns;
     --     
