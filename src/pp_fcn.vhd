@@ -25,6 +25,7 @@ use work.pp_fcn_rom_pkg.all;
 entity pp_fcn_ln is
     port ( clk : in std_logic;                  --! Clock input
            rstn : in std_logic;                 --! Inverted reset
+           en : in std_logic;                   --! Clock Enable
            x : in unsigned(31-1 downto 0);      --! Input. bit value: (0,31)  \\Rightarrow x \\in [0,1) . (The leading one-bit is *implicit*!).
            y_e : out unsigned(26 downto 0)      --! Output. bit value: (0,27) \\Rightarrow x \\in [0,1).
            );
@@ -51,6 +52,7 @@ architecture beh of pp_fcn_ln is
     component mult_23_23_24 IS
         PORT (
             CLK : IN STD_LOGIC;
+            CE : IN STD_LOGIC;
             A : IN STD_LOGIC_VECTOR(22 DOWNTO 0);
             B : IN STD_LOGIC_VECTOR(22 DOWNTO 0);
             P : OUT STD_LOGIC_VECTOR(23 DOWNTO 0)
@@ -64,6 +66,10 @@ architecture beh of pp_fcn_ln is
     -- Buffer Stage
     signal r_i_x        : signed(COEFF_WIDTHS(1)-1 downto 0);                       --! Input fraction buffer
     signal r_i_coeffs   : std_logic_vector(POLY_WIDTHS(2) - 1 downto 0);            --! Coefficient buffer register
+    
+    -- Ram Buffer Stage
+    signal r_r_x        : signed(COEFF_WIDTHS(1)-1 downto 0);            
+    signal r_r_coeffs   : std_logic_vector(POLY_WIDTHS(2) - 1 downto 0); 
     
     signal r_0_x        : signed(COEFF_WIDTHS(1)-1 downto 0);                       --! Input fraction buffer
     signal r_0_coeffs   : std_logic_vector(POLY_WIDTHS(1) - 1 downto 0);            --! Coefficient buffer register; coefficient 0 and 1
@@ -99,6 +105,7 @@ begin
     mult : mult_23_23_24
         port map (
             CLK => clk,
+            CE => en,
             A => w_3_a,
             B => std_logic_vector(r_2_x),
             P => w_3_y
@@ -112,15 +119,19 @@ begin
     
     process (clk)
     begin
-        if rising_edge(clk) then
+        if rising_edge(clk) and en = '1' then
             -- Fetch Operands
             r_i_x <= signed('0' & std_logic_vector(w_x_A(w_x_A'length-1 downto w_x_A'length-(r_i_x'length-1))));
             r_i_coeffs <= LOG_COEFF_TABLE(to_integer(w_x_B));
             
+            -- RAM Registers
+            r_r_x <= r_i_x;
+            r_r_coeffs <= r_i_coeffs;
+            
             -- Load operands
-            r_0_x <= r_i_x;
-            r_0_coeffs <= r_i_coeffs(POLY_WIDTHS(1)-1 downto 0);
-            r_0_c_2 <= signed(r_i_coeffs(POLY_WIDTHS(2)-1 downto POLY_WIDTHS(1)));
+            r_0_x <= r_r_x;
+            r_0_coeffs <= r_r_coeffs(POLY_WIDTHS(1)-1 downto 0);
+            r_0_c_2 <= signed(r_r_coeffs(POLY_WIDTHS(2)-1 downto POLY_WIDTHS(1)));
             
             -- DSP Input Buffer Stage
             r_d_x <= r_0_x;
@@ -180,6 +191,7 @@ use work.pp_fcn_rom_pkg.all;
 entity pp_fcn_sqrt is
     port ( clk : in std_logic;                          --! Clock input
            rstn : in std_logic;                         --! Inverted reset
+           en : in std_logic;                           --! Clock Enable
            x : in std_logic_vector(7+13-1 downto 0);    --! Input. bit value: (1,0,19)
            y : out unsigned(16 downto 0)                --! Output. bit value: (1, 16)
            );
@@ -210,8 +222,12 @@ architecture beh of pp_fcn_sqrt is
     signal r_i_x        : signed(COEFF_WIDTHS(1) downto 0);
     signal r_i_coeffs   : std_logic_vector(POLY_WIDTHS(1) - 1 downto 0);
     
+    -- RAM Buffer
+    signal r_r_x        : signed(COEFF_WIDTHS(1) downto 0);
+    signal r_r_coeffs   : std_logic_vector(POLY_WIDTHS(1) - 1 downto 0);
+    
     signal r_0_x        : signed(COEFF_WIDTHS(1)+6-1 downto 0);
-    signal r_0_coeffs   : std_logic_vector(POLY_WIDTHS(0) - 1 downto 0);
+    signal r_0_c_0      : std_logic_vector(POLY_WIDTHS(0) - 1 downto 0);
     signal r_0_c_1      : signed(COEFF_WIDTHS(1)-1 downto 0);
     
     -- signal r_d_x        : signed(COEFF_WIDTHS(1)+6-1 downto 0);
@@ -238,26 +254,29 @@ begin
     
     process (clk)
     begin
-        if rising_edge(clk) then
+        if rising_edge(clk) and en = '1' then
             -- Fetch Operands
             r_i_x <= signed('0' & std_logic_vector(w_x_A));
             r_i_coeffs <= SQRT_COEFF_TABLE(to_integer(unsigned(w_x_B)));
             
+            -- RAM Buffer
+            r_r_x <= r_i_x;
+            r_r_coeffs <= r_i_coeffs;
+            
             -- Load operands
             r_0_x(r_0_x'length - 1 downto r_0_x'length - 5) <= (others => '0');
-            r_0_x(r_i_x'range) <= r_i_x;
-            r_0_coeffs <= r_i_coeffs(POLY_WIDTHS(0)-1 downto 0);
-            r_0_c_1 <= signed(r_i_coeffs(POLY_WIDTHS(1)-1 downto POLY_WIDTHS(0)));
+            r_0_x(r_r_x'range) <= r_r_x;
+            r_0_c_0 <= r_r_coeffs(POLY_WIDTHS(0)-1 downto 0);
+            r_0_c_1 <= signed(r_r_coeffs(POLY_WIDTHS(1)-1 downto POLY_WIDTHS(0)));
             
             -- DSP Input Buffer Stage
             -- r_d_x <= r_0_x;
             -- r_d_coeffs <= r_0_coeffs;
             -- r_d_c_1 <= r_0_c_1;
             
-            
             r_1_y <= r_0_c_1 * r_0_x;
             
-            r_1_c_0(r_1_c_0'length-1 downto r_1_c_0'length-COEFF_WIDTHS(0)) <= signed(r_0_coeffs);
+            r_1_c_0(r_1_c_0'length-1 downto r_1_c_0'length-COEFF_WIDTHS(0)) <= signed(r_0_c_0);
             r_1_c_0(COEFF_WIDTHS(1)-1 downto 0) <= (others => '0');
             
             
@@ -290,6 +309,7 @@ entity pp_fcn_trig is
     port (
         clk : in std_logic;                     --! Clock input
         rstn : in std_logic;                    --! Inverted Reset
+        en : in std_logic;                      --! Clock Enable
         x : in std_logic_vector(13 downto 0);   --! Input. bit value: (0,14)
         y_sin : out signed(17 downto 0);        --! sin output. bit value: (2,16)
         y_cos : out signed(17 downto 0)         --! cos output. bit value: (2,16)
@@ -317,9 +337,13 @@ architecture beh of pp_fcn_trig is
     signal w_x_B        : std_logic_vector(LOG_NSEGMENTS-1 downto 0);
     signal w_x_A        : std_logic_vector(X_FRAC_LENGTH-1 downto 0);
     
-    -- Buffer Stage
+    -- Input Buffer Stage
     signal r_i_x        : signed(X_FRAC_LENGTH+1-1 downto 0);
     signal r_i_coeffs   : std_logic_vector(2*POLY_WIDTHS(1) - 1 downto 0);
+    
+    -- Ram Buffer Stage
+    signal r_r_x        : signed(X_FRAC_LENGTH+1-1 downto 0);
+    signal r_r_coeffs   : std_logic_vector(2*POLY_WIDTHS(1) - 1 downto 0);
     
     signal r_0_x        : signed(COEFF_WIDTHS(1)+2-1 downto 0);
     signal r_0_c_1_sin  : signed(COEFF_WIDTHS(1)-1 downto 0);
@@ -349,21 +373,25 @@ begin
     
     process (clk)
     begin
-        if rising_edge(clk) then
+        if rising_edge(clk) and en = '1' then
             -- Fetch Operands
             r_i_x <= signed('0' & std_logic_vector(w_x_A));
             r_i_coeffs <= TRIG_COEFF_TABLE(to_integer(unsigned(w_x_B)));
             
+            -- Ram Buffer
+            r_r_x <= r_i_x;
+            r_r_coeffs <= r_i_coeffs;
+            
             -- Load operands
-            r_0_x(r_0_x'length - 1 downto r_i_x'length) <= (others => '0');
-            r_0_x(r_i_x'range) <= r_i_x;
+            r_0_x(r_0_x'length - 1 downto r_r_x'length) <= (others => '0');
+            r_0_x(r_r_x'range) <= r_r_x;
             
-            r_0_c_0_sin <= signed(r_i_coeffs(POLY_WIDTHS(2) - 1 downto POLY_WIDTHS(1)));
-            r_0_c_1_sin <= signed(r_i_coeffs(POLY_WIDTHS(3) - 1 downto POLY_WIDTHS(2)));
+            r_0_c_0_sin <= signed(r_r_coeffs(POLY_WIDTHS(2) - 1 downto POLY_WIDTHS(1)));
+            r_0_c_1_sin <= signed(r_r_coeffs(POLY_WIDTHS(3) - 1 downto POLY_WIDTHS(2)));
             
-            r_0_c_0_cos <= signed(r_i_coeffs(POLY_WIDTHS(0) - 1 downto 0));
-            r_0_c_1_cos <= signed(r_i_coeffs(POLY_WIDTHS(1) - 1 downto POLY_WIDTHS(0)));
-            
+            r_0_c_0_cos <= signed(r_r_coeffs(POLY_WIDTHS(0) - 1 downto 0));
+            r_0_c_1_cos <= signed(r_r_coeffs(POLY_WIDTHS(1) - 1 downto POLY_WIDTHS(0)));
+
             
             -- DSP Input Buffer Stage
             -- r_d_x <= r_0_x;

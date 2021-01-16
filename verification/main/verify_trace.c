@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    vcd_t *vcd = vcd_open(argv[1], 5);
+    vcd_t *vcd = vcd_open(argv[1], 6);
     if (vcd == NULL) {
         perror("Failed to open input file");
         return EXIT_FAILURE;
@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    vcd_skip(vcd, 30);
+    vcd_skip(vcd, 35);
 
     double ulp = 1.0 / (1 << 11);
 
@@ -95,9 +95,9 @@ int main(int argc, char *argv[]) {
         vcd_next(vcd);
 
         ssize_t i = vcd_get_data_idx(vcd, 0);
-        ssize_t i_u_0 = vcd_get_data_idx(vcd, -21);
-        ssize_t i_u_1 = vcd_get_data_idx(vcd, -6);
-        ssize_t i_u_2 = vcd_get_data_idx(vcd, -29);
+        ssize_t i_u_0 = vcd_get_data_idx(vcd, -23);
+        ssize_t i_u_1 = vcd_get_data_idx(vcd, -9);
+        ssize_t i_u_2 = vcd_get_data_idx(vcd, -32);
 
         double x[2];
         gaussian(r_i_u_0->data[i_u_0], r_i_u_1->data[i_u_1], r_i_u_2->data[i_u_2], x);
@@ -116,7 +116,7 @@ int main(int argc, char *argv[]) {
 
         double max_error = fabs(MAX(x[0] - x_[0], x[1] - x_[1]));
 
-        if (max_error > 1.5 * ulp)
+        if (max_error > 1.5 * ulp || 1)
             printf("%8.5f x_0=(%8.5f | %8.5f) x_1=(%8.5f | %8.5f) t=%12ld r_i_u_0=0x%016lx r_i_u_1=0x%016lx r_i_u_2=0x%016lx\n",
                 max_error,
                 x[0], x_[0], x[1], x_[1],

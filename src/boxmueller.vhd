@@ -3,8 +3,11 @@
 --! @brief Box-Mueller transformator
 --! @author David Winter
 --------------------------------------------------------------------------------
+--! VHDL standard library
 library ieee;
+--! Logic primitives and vectors
 use ieee.std_logic_1164.all;
+--! Fixed width integer primitives
 use ieee.numeric_std.all;
 
 --! Implements the box-mueller transformation to create a gaussian distribution
@@ -22,6 +25,7 @@ entity boxmueller is
     port ( 
         clk  : in std_logic;                         --! Data clock
         rstn : in std_logic;                         --! Negative reset
+        en   : in std_logic;                         --! Clock enable (WIP / broken)
         u    : in std_logic_vector(95 downto 0);     --! Uniform random input
         x_0  : out signed(15 downto 0);              --! First output normal variable   bit value: (5,11)
         x_1  : out signed(15 downto 0)               --! Second output normal variable  bit value: (5,11)
@@ -57,6 +61,7 @@ architecture beh of boxmueller is
         port (
             clk : in std_logic;
             rstn : in std_logic;
+            en : in std_logic;
             x : in unsigned(30 downto 0);
             y_e : out unsigned(26 downto 0)
        );
@@ -66,6 +71,7 @@ architecture beh of boxmueller is
         port (
             clk : in std_logic;
             rstn : in std_logic;
+            en : in std_logic;
             x : in std_logic_vector(7+13-1 downto 0);
             y : out unsigned(16 downto 0)
        );
@@ -75,6 +81,7 @@ architecture beh of boxmueller is
         port (
             clk : in std_logic;
             rstn : in std_logic;
+            en : in std_logic;
             x : in std_logic_vector(13 downto 0);
             y_sin : out signed(17 downto 0);
             y_cos : out signed(17 downto 0)
@@ -124,7 +131,7 @@ architecture beh of boxmueller is
     signal w_f_p    : unsigned(4 downto 0);
     
     signal r_f_exp  : signed(5 downto 0);
-    type exp_delay_t is array(0 to 8) of signed(r_f_exp'range);
+    type exp_delay_t is array(0 to 9) of signed(r_f_exp'range);
     signal r_f_exp_d : exp_delay_t;
     signal r_f_e_1  : signed(r_e'range);
 
@@ -138,12 +145,17 @@ architecture beh of boxmueller is
     signal r_f      : signed(5+13-1 downto 0);
     
     -- sin/cos
-    type r_t_quad_t is array(0 to 3) of unsigned(1 downto 0);
+    type r_t_quad_t is array(0 to 4) of unsigned(1 downto 0);
     signal r_t_quad : r_t_quad_t;
     signal w_t_sin  : signed(17 downto 0);
     signal w_t_cos  : signed(17 downto 0);
     signal r_t_g_0  : signed(17 downto 0);
     signal r_t_g_1  : signed(17 downto 0);
+    signal r_b_g_0  : signed(17 downto 0);
+    signal r_b_g_1  : signed(17 downto 0);
+    
+    signal r_o_0  : signed(r_t_g_0'length + r_f'length - 1 downto 0);
+    signal r_o_1  : signed(r_t_g_0'length + r_f'length - 1 downto 0);
     
     signal r_x_0  : signed(r_t_g_0'length + r_f'length - 1 downto 0);
     signal r_x_1  : signed(r_t_g_0'length + r_f'length - 1 downto 0);
@@ -151,7 +163,7 @@ begin
     process (clk)
         variable quad : integer range 0 to 3;
     begin
-        if rising_edge(clk) then
+        if rising_edge(clk) and en = '1' then
             -- Buffer input
             r_i_u_0 <= u(48 downto 1);
             r_i_u_1 <= u(64 downto 49);
@@ -174,7 +186,7 @@ begin
             r_f_exp <= signed('0' & std_logic_vector(w_f_p)) - 6;
             
             r_f_exp_d(0) <= r_f_exp;
-            for i in 1 to r_f_exp_d'length-3 loop
+            for i in 1 to r_f_exp_d'length-4 loop
                 r_f_exp_d(i) <= r_f_exp_d(i-1);
             end loop;
             
@@ -185,6 +197,8 @@ begin
             else
                 r_f_exp_d(8) <= r_f_exp_d(7);
             end if;
+            
+            r_f_exp_d(9) <= r_f_exp_d(8);
             
             r_f_x <= r_f_exp_d(2)(0) & w_f_x(23 downto 0);
             
@@ -199,7 +213,7 @@ begin
                 r_t_quad(i) <= r_t_quad(i-1);
             end loop;
             
-            quad := to_integer(r_t_quad(3));
+            quad := to_integer(r_t_quad(4));
             case quad is
                 when 0 =>
                     r_t_g_0 <= w_t_sin;
@@ -215,8 +229,14 @@ begin
                     r_t_g_1 <= w_t_sin;
             end case;
             
-            r_x_0 <= r_f * r_t_g_0;
-            r_x_1 <= r_f * r_t_g_1;
+            r_b_g_0 <= r_t_g_0;
+            r_b_g_1 <= r_t_g_1;
+            
+            r_o_0 <= r_f * r_b_g_0;
+            r_o_1 <= r_f * r_b_g_1;
+            
+            r_x_0 <= r_o_0;
+            r_x_1 <= r_o_1;
             
         end if;
     end process;
@@ -230,7 +250,7 @@ begin
         port map (
             clk => clk,
             rstn => rstn,
-            en => '1',
+            en => en,
             din => w_f_lzd_i,
             p => w_f_p
             );
@@ -243,7 +263,7 @@ begin
          port map (
              clk => clk,
              rstn => rstn,
-             en => '1',
+             en => en,
              din => std_logic_vector(r_f_e_1),
              c => r_f_exp,
              dout => w_f_x
@@ -258,21 +278,17 @@ begin
          port map (
              clk => clk,
              rstn => rstn,
-             en => '1',
+             en => en,
              din => std_logic_vector(r_f_y),
-             c => r_f_exp_d(8),
+             c => r_f_exp_d(9),
              dout => w_f
          );
-    
-    -- NOTE: lzd_48 and pp_fcn_ln have different pipeline depths!
-    --       We can conveniently ignore that, because u_0 and u_2 are
-    --       independent!
     
     lzd_e : lzd_48
         port map (
             clk => clk,
             rstn => rstn,
-            en => '1',
+            en => en,
             din => r_i_u_0,
             p => w_e_p
         );
@@ -281,6 +297,7 @@ begin
         port map (
             clk => clk,
             rstn => rstn,
+            en => en,
             x => unsigned(r_i_u_2),
             y_e => w_e_y
        );
@@ -289,6 +306,7 @@ begin
        port map (
            clk => clk,
            rstn => rstn,
+           en => en,
            x => r_f_x(r_f_x'length - 1 downto r_f_x'length - 20),
            y => w_f_y
        );
@@ -297,6 +315,7 @@ begin
         port map (
             clk => clk,
             rstn => rstn,
+            en => en,
             x => r_i_u_1(13 downto 0),
             y_sin => w_t_sin,
             y_cos => w_t_cos
