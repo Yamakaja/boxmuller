@@ -145,7 +145,7 @@ architecture beh of boxmueller is
     signal r_f      : signed(5+13-1 downto 0);
     
     -- sin/cos
-    type r_t_quad_t is array(0 to 4) of unsigned(1 downto 0);
+    type r_t_quad_t is array(0 to 6) of unsigned(1 downto 0);
     signal r_t_quad : r_t_quad_t;
     signal w_t_sin  : signed(17 downto 0);
     signal w_t_cos  : signed(17 downto 0);
@@ -153,6 +153,8 @@ architecture beh of boxmueller is
     signal r_t_g_1  : signed(17 downto 0);
     signal r_b_g_0  : signed(17 downto 0);
     signal r_b_g_1  : signed(17 downto 0);
+    signal r_b2_g_0  : signed(17 downto 0);
+    signal r_b2_g_1  : signed(17 downto 0);
     
     signal r_o_0  : signed(r_t_g_0'length + r_f'length - 1 downto 0);
     signal r_o_1  : signed(r_t_g_0'length + r_f'length - 1 downto 0);
@@ -213,7 +215,7 @@ begin
                 r_t_quad(i) <= r_t_quad(i-1);
             end loop;
             
-            quad := to_integer(r_t_quad(4));
+            quad := to_integer(r_t_quad(r_t_quad'length-1));
             case quad is
                 when 0 =>
                     r_t_g_0 <= w_t_sin;
@@ -232,8 +234,11 @@ begin
             r_b_g_0 <= r_t_g_0;
             r_b_g_1 <= r_t_g_1;
             
-            r_o_0 <= r_f * r_b_g_0;
-            r_o_1 <= r_f * r_b_g_1;
+            r_b2_g_0 <= r_b_g_0;
+            r_b2_g_1 <= r_b_g_1;
+            
+            r_o_0 <= r_f * r_b2_g_0;
+            r_o_1 <= r_f * r_b2_g_1;
             
             r_x_0 <= r_o_0;
             r_x_1 <= r_o_1;

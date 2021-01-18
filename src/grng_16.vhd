@@ -15,11 +15,11 @@ use work.xoro_seeds.all;
 --! 128-bit wide GRNG (16 values @ 6 bit + 2 bits of padding (signed))
 entity grng_16 is
     generic (
-        xoro_seed_base : integer := 0                                   --! The xoroshiro seed base, to avoid overlaps
+        xoro_seed_base : integer := 0                                   --! The seed base is an index into an array of seeds that will be used to initialize the uniform random number generators of this core. To avoid seed duplication, increment this value by one for each instance of this core in your design!
         );
     port (
         clk     : in std_logic;                                         --! Clock in
-        rstn    : in std_logic;                                         --! Inverted Reset
+        resetn  : in std_logic;                                         --! Inverted Reset
         en      : in std_logic;                                         --! Enable
         
         s_axis_tdata    : out std_logic_vector(8 * 16 - 1 downto 0);    --! AXI Stream Data Out
@@ -126,7 +126,7 @@ begin
         )
         port map (
             clk             => clk,
-            rstn            => rstn,
+            rstn            => resetn,
             en              => en,
             updated         => w_updated,
             din             => std_logic_vector(w_remapped),
@@ -142,7 +142,7 @@ begin
         )
         port map (
             clk     => clk,
-            rstn    => rstn,
+            rstn    => resetn,
             sb_data => sb_din,
             sb_en   => sb_en,
             dout    => w_sb_data,
@@ -154,7 +154,7 @@ begin
         out_remap : output_remapper
             port map (
                 clk     => clk,
-                rstn    => rstn,
+                rstn    => resetn,
                 en      => w_sub_en,
                 din     => w_bm_out(i),
                 factor  => signed(w_sb_data(SB_FAC_WIDTH + SB_OFF_WIDTH - 1 downto SB_OFF_WIDTH)),
@@ -172,7 +172,7 @@ begin
                 )
             port map (
                 clk    => clk,
-                rstn   => rstn,
+                rstn   => resetn,
                 enable => w_sub_en,
                 dout   => w_xoro_data((i+1)*XORO_OUT_WIDTH - 1 downto i*XORO_OUT_WIDTH)
             );
@@ -183,7 +183,7 @@ begin
         bm : boxmueller
             port map (
                 clk  => clk,
-                rstn => rstn,
+                rstn => resetn,
                 en   => w_sub_en,
                 u    => w_xoro_data((i+1)*BM_IN_WIDTH - 1 downto i * BM_IN_WIDTH),
                 x_0  => w_bm_out(2*i + 0),

@@ -341,9 +341,12 @@ architecture beh of pp_fcn_trig is
     signal r_i_x        : signed(X_FRAC_LENGTH+1-1 downto 0);
     signal r_i_coeffs   : std_logic_vector(2*POLY_WIDTHS(1) - 1 downto 0);
     
-    -- Ram Buffer Stage
+    -- Ram Buffer Stages
     signal r_r_x        : signed(X_FRAC_LENGTH+1-1 downto 0);
     signal r_r_coeffs   : std_logic_vector(2*POLY_WIDTHS(1) - 1 downto 0);
+    
+    signal r_r2_x        : signed(X_FRAC_LENGTH+1-1 downto 0);
+    signal r_r2_coeffs   : std_logic_vector(2*POLY_WIDTHS(1) - 1 downto 0);
     
     signal r_0_x        : signed(COEFF_WIDTHS(1)+2-1 downto 0);
     signal r_0_c_1_sin  : signed(COEFF_WIDTHS(1)-1 downto 0);
@@ -366,6 +369,10 @@ architecture beh of pp_fcn_trig is
     signal r_2_y_sin    : signed(OUT_WIDTH - 1 downto 0);
     signal r_2_y_cos    : signed(OUT_WIDTH - 1 downto 0);
     
+    signal r_3_y_sin    : signed(OUT_WIDTH - 1 downto 0);
+    signal r_3_y_cos    : signed(OUT_WIDTH - 1 downto 0);
+
+    
 begin
 
     w_x_B <= x(x'length-1 downto X_FRAC_LENGTH);
@@ -382,15 +389,18 @@ begin
             r_r_x <= r_i_x;
             r_r_coeffs <= r_i_coeffs;
             
+            r_r2_x <= r_r_x;
+            r_r2_coeffs <= r_r_coeffs;
+            
             -- Load operands
-            r_0_x(r_0_x'length - 1 downto r_r_x'length) <= (others => '0');
-            r_0_x(r_r_x'range) <= r_r_x;
+            r_0_x(r_0_x'length - 1 downto r_r2_x'length) <= (others => '0');
+            r_0_x(r_r2_x'range) <= r_r2_x;
             
-            r_0_c_0_sin <= signed(r_r_coeffs(POLY_WIDTHS(2) - 1 downto POLY_WIDTHS(1)));
-            r_0_c_1_sin <= signed(r_r_coeffs(POLY_WIDTHS(3) - 1 downto POLY_WIDTHS(2)));
+            r_0_c_0_sin <= signed(r_r2_coeffs(POLY_WIDTHS(2) - 1 downto POLY_WIDTHS(1)));
+            r_0_c_1_sin <= signed(r_r2_coeffs(POLY_WIDTHS(3) - 1 downto POLY_WIDTHS(2)));
             
-            r_0_c_0_cos <= signed(r_r_coeffs(POLY_WIDTHS(0) - 1 downto 0));
-            r_0_c_1_cos <= signed(r_r_coeffs(POLY_WIDTHS(1) - 1 downto POLY_WIDTHS(0)));
+            r_0_c_0_cos <= signed(r_r2_coeffs(POLY_WIDTHS(0) - 1 downto 0));
+            r_0_c_1_cos <= signed(r_r2_coeffs(POLY_WIDTHS(1) - 1 downto POLY_WIDTHS(0)));
 
             
             -- DSP Input Buffer Stage
@@ -413,10 +423,13 @@ begin
             -- eta_1 = eta_2 + C_1
             r_2_y_sin <= r_1_c_0_sin + r_1_y_sin;
             r_2_y_cos <= r_1_c_0_cos + r_1_y_cos;
+            
+            r_3_y_sin <= r_2_y_sin;
+            r_3_y_cos <= r_2_y_cos;
         end if;
     end process;
     
-    y_sin(y_sin'length - 1 downto 0) <= r_2_y_sin(r_2_y_sin'length - 1 downto r_2_y_sin'length - y_sin'length);
-    y_cos(y_cos'length - 1 downto 0) <= r_2_y_cos(r_2_y_cos'length - 1 downto r_2_y_cos'length - y_cos'length);
+    y_sin(y_sin'length - 1 downto 0) <= r_3_y_sin(r_3_y_sin'length - 1 downto r_3_y_sin'length - y_sin'length);
+    y_cos(y_cos'length - 1 downto 0) <= r_3_y_cos(r_3_y_cos'length - 1 downto r_3_y_cos'length - y_cos'length);
 
 end beh;

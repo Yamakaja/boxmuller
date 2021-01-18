@@ -27,7 +27,7 @@ architecture beh of top is
             );
         port (
             clk     : in std_logic;
-            rstn    : in std_logic;
+            resetn  : in std_logic;
             en      : in std_logic;
             
             s_axis_tdata    : out std_logic_vector(8 * 16 - 1 downto 0);
@@ -59,7 +59,7 @@ begin
             )
         port map (
             clk     => clk,
-            rstn    => rstn,
+            resetn    => rstn,
             en      => en,
             
             s_axis_tdata    => w_axis_tdata,

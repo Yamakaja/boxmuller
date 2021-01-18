@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
 
         ssize_t i = vcd_get_data_idx(vcd, 0);
         ssize_t i_u_0 = vcd_get_data_idx(vcd, -23);
-        ssize_t i_u_1 = vcd_get_data_idx(vcd, -9);
+        ssize_t i_u_1 = vcd_get_data_idx(vcd, -12);
         ssize_t i_u_2 = vcd_get_data_idx(vcd, -32);
 
         double x[2];

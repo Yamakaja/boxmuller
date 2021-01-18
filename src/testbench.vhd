@@ -167,7 +167,7 @@ architecture beh of testbench is
             );
         port (
             clk     : in std_logic;
-            rstn    : in std_logic;
+            resetn  : in std_logic;
             en      : in std_logic;
             
             s_axis_tdata    : out std_logic_vector(8 * 16 - 1 downto 0);
@@ -281,7 +281,7 @@ begin
             )
         port map (
             clk     => t_clk,
-            rstn    => t_rstn,
+            resetn  => t_rstn,
             en      => t_en,
             
             s_axis_tdata    => t_axis_tdata,
