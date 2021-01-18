@@ -225,6 +225,8 @@ architecture beh of pp_fcn_sqrt is
     -- RAM Buffer
     signal r_r_x        : signed(COEFF_WIDTHS(1) downto 0);
     signal r_r_coeffs   : std_logic_vector(POLY_WIDTHS(1) - 1 downto 0);
+    signal r_r2_x        : signed(COEFF_WIDTHS(1) downto 0);
+    signal r_r2_coeffs   : std_logic_vector(POLY_WIDTHS(1) - 1 downto 0);
     
     signal r_0_x        : signed(COEFF_WIDTHS(1)+6-1 downto 0);
     signal r_0_c_0      : std_logic_vector(POLY_WIDTHS(0) - 1 downto 0);
@@ -263,11 +265,14 @@ begin
             r_r_x <= r_i_x;
             r_r_coeffs <= r_i_coeffs;
             
+            r_r2_x <= r_r_x;
+            r_r2_coeffs <= r_r_coeffs;
+            
             -- Load operands
             r_0_x(r_0_x'length - 1 downto r_0_x'length - 5) <= (others => '0');
-            r_0_x(r_r_x'range) <= r_r_x;
-            r_0_c_0 <= r_r_coeffs(POLY_WIDTHS(0)-1 downto 0);
-            r_0_c_1 <= signed(r_r_coeffs(POLY_WIDTHS(1)-1 downto POLY_WIDTHS(0)));
+            r_0_x(r_r2_x'range) <= r_r2_x;
+            r_0_c_0 <= r_r2_coeffs(POLY_WIDTHS(0)-1 downto 0);
+            r_0_c_1 <= signed(r_r2_coeffs(POLY_WIDTHS(1)-1 downto POLY_WIDTHS(0)));
             
             -- DSP Input Buffer Stage
             -- r_d_x <= r_0_x;

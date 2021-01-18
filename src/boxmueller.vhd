@@ -131,7 +131,7 @@ architecture beh of boxmueller is
     signal w_f_p    : unsigned(4 downto 0);
     
     signal r_f_exp  : signed(5 downto 0);
-    type exp_delay_t is array(0 to 9) of signed(r_f_exp'range);
+    type exp_delay_t is array(0 to 10) of signed(r_f_exp'range);
     signal r_f_exp_d : exp_delay_t;
     signal r_f_e_1  : signed(r_e'range);
 
@@ -201,6 +201,8 @@ begin
             end if;
             
             r_f_exp_d(9) <= r_f_exp_d(8);
+            r_f_exp_d(10) <= r_f_exp_d(9);
+
             
             r_f_x <= r_f_exp_d(2)(0) & w_f_x(23 downto 0);
             
@@ -285,7 +287,7 @@ begin
              rstn => rstn,
              en => en,
              din => std_logic_vector(r_f_y),
-             c => r_f_exp_d(9),
+             c => r_f_exp_d(r_f_exp_d'length - 1),
              dout => w_f
          );
     

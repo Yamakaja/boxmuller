@@ -27,9 +27,9 @@ architecture beh of testbench is
     -- signal t_sb_dout : std_logic_vector(23 downto 0);
     -- signal t_sb_updated : std_logic;
     
-    signal t_axis_tready : std_logic;
-    signal t_axis_tvalid : std_logic;
-    signal t_axis_tdata  : std_logic_vector(127 downto 0);
+    -- signal t_axis_tready : std_logic;
+    -- signal t_axis_tvalid : std_logic;
+    -- signal t_axis_tdata  : std_logic_vector(127 downto 0);
     -- signal t_sub_en      : std_logic;
     
     -- signal t_p : unsigned(5 downto 0);
@@ -47,53 +47,6 @@ architecture beh of testbench is
     -- 
     -- signal t_shift_c : signed(5 downto 0)               := to_signed(-16, 6);
     -- signal t_shift_dout : std_logic_vector(31 downto 0) := (others => '0');
-    
-    -- component lzd_48
-    --     port (  clk : in std_logic;
-    --         rstn : in std_logic;
-    --         en : in std_logic;
-    --         din : in std_logic_vector(47 downto 0);
-    --         p : out unsigned(5 downto 0));
-    -- end component;
-    -- 
-    -- component shifter_lr
-    -- generic (
-    --        data_width : integer := 16;
-    --        control_width : integer := 5
-    --        );
-    -- port ( clk : in STD_LOGIC;
-    --        rstn : in STD_LOGIC;
-    --        en : in STD_LOGIC;
-    --        din : in STD_LOGIC_VECTOR (data_width - 1 downto 0);
-    --        c : in signed(control_width-1 downto 0);
-    --        dout : out STD_LOGIC_VECTOR (data_width - 1 downto 0));
-    -- end component;
-    -- 
-    -- component pp_fcn_ln is
-    -- port ( clk : in std_logic;
-    --        rstn : in std_logic;
-    --        x : in unsigned(30 downto 0);
-    --        y_e : out unsigned(26 downto 0)
-    --        );
-    -- end component;
-    -- 
-    -- component pp_fcn_sqrt is
-    -- port ( clk : in std_logic;
-    --        rstn : in std_logic;
-    --        x : in std_logic_vector(7+13-1 downto 0);
-    --        y : out unsigned(16 downto 0)
-    --        );
-    -- end component;
-    -- 
-    -- component pp_fcn_trig is
-    --     port (
-    --         clk : in std_logic;
-    --         rstn : in std_logic;
-    --         x : in std_logic_vector(13 downto 0);
-    --         y_sin : out signed(17 downto 0);
-    --         y_cos : out signed(17 downto 0)
-    --     );
-    -- end component;
     
     component boxmueller is
         port ( 
@@ -275,54 +228,54 @@ begin
     --         sub_en          => t_sub_en
     --     );
         
-    grng : grng_16
-        generic map (
-            xoro_seed_base => 0
-            )
-        port map (
-            clk     => t_clk,
-            resetn  => t_rstn,
-            en      => t_en,
-            
-            s_axis_tdata    => t_axis_tdata,
-            s_axis_tready   => t_axis_tready,
-            s_axis_tvalid   => t_axis_tvalid,
-            
-            sb_din  => t_sb_data,
-            sb_en   => t_sb_en
-        );
+    -- grng : grng_16
+    --     generic map (
+    --         xoro_seed_base => 0
+    --         )
+    --     port map (
+    --         clk     => t_clk,
+    --         resetn  => t_rstn,
+    --         en      => t_en,
+    --         
+    --         s_axis_tdata    => t_axis_tdata,
+    --         s_axis_tready   => t_axis_tready,
+    --         s_axis_tvalid   => t_axis_tvalid,
+    --         
+    --         sb_din  => t_sb_data,
+    --         sb_en   => t_sb_en
+    --     );
     
     t_clk <= not t_clk after 5 ns;
     t_rstn <= '1' after 3 ns;
     
     seq : process
     begin
-        t_axis_tready <= '0';
+        -- t_axis_tready <= '0';
         t_sb_data <= '0';
         -- wait for 309 ns;
         wait for 11 ns;
         t_en <= '1';
-        t_sb_en <= '1';
+        -- t_sb_en <= '1';
         
-        wait for 70 ns;
-        t_sb_data <= '1';
-        wait for 10 ns;
-        t_sb_data <= '0';
+        -- wait for 70 ns;
+        -- t_sb_data <= '1';
+        -- wait for 10 ns;
+        -- t_sb_data <= '0';
+        -- 
+        -- wait for 160 ns;
+        -- t_sb_en <= '0';
         
-        wait for 160 ns;
-        t_sb_en <= '0';
+        -- wait for 700 ns;
+        -- t_axis_tready <= '1';
+        -- wait for 50 ns;
+        -- t_axis_tready <= '0';
+        -- wait for 50 ns;
+        -- t_axis_tready <= '1';
         
-        wait for 700 ns;
-        t_axis_tready <= '1';
-        wait for 50 ns;
-        t_axis_tready <= '0';
-        wait for 50 ns;
-        t_axis_tready <= '1';
-        
-        wait for 50 ns;
-        t_en <= '0';
-        wait for 50 ns;
-        t_en <= '1';
+        -- wait for 50 ns;
+        -- t_en <= '0';
+        -- wait for 50 ns;
+        -- t_en <= '1';
         
         -- wait for 10 ns;
         -- t_en <= '0';

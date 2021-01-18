@@ -95,9 +95,9 @@ int main(int argc, char *argv[]) {
         vcd_next(vcd);
 
         ssize_t i = vcd_get_data_idx(vcd, 0);
-        ssize_t i_u_0 = vcd_get_data_idx(vcd, -23);
+        ssize_t i_u_0 = vcd_get_data_idx(vcd, -24);
         ssize_t i_u_1 = vcd_get_data_idx(vcd, -12);
-        ssize_t i_u_2 = vcd_get_data_idx(vcd, -32);
+        ssize_t i_u_2 = vcd_get_data_idx(vcd, -33);
 
         double x[2];
         gaussian(r_i_u_0->data[i_u_0], r_i_u_1->data[i_u_1], r_i_u_2->data[i_u_2], x);
