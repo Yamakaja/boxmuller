@@ -50,3 +50,6 @@ export_ip_user_files -of_objects [get_files $project_location/boxmueller.srcs/so
 create_ip_run [get_files -of_objects [get_fileset sources_1] $project_location/boxmueller.srcs/sources_1/ip/mult_23_23_24/mult_23_23_24.xci]
 launch_runs mult_23_23_24_synth_1 -jobs 4
 export_simulation -of_objects [get_files $project_location/boxmueller.srcs/sources_1/ip/mult_23_23_24/mult_23_23_24.xci] -directory $project_location/boxmueller.ip_user_files/sim_scripts -ip_user_files_dir $project_location/boxmueller.ip_user_files -ipstatic_source_dir $project_location/boxmueller.ip_user_files/ipstatic -lib_map_path [list {modelsim=$project_location/boxmueller.cache/compile_simlib/modelsim} {questa=$project_location/boxmueller.cache/compile_simlib/questa} {ies=$project_location/boxmueller.cache/compile_simlib/ies} {xcelium=$project_location/boxmueller.cache/compile_simlib/xcelium} {vcs=$project_location/boxmueller.cache/compile_simlib/vcs} {riviera=$project_location/boxmueller.cache/compile_simlib/riviera}] -use_ip_compiled_libs -force -quiet
+set_property top testbench [get_filesets sim_1]
+set_property top_lib xil_defaultlib [get_filesets sim_1]
+update_compile_order -fileset sim_1

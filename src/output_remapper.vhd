@@ -12,8 +12,8 @@ use ieee.numeric_std.all;
 
 --! Used to transform a normal distribution with mu=0, sigma=1 to
 --! a normal distribution with mu=offset, sigma=factor.
---! Finally, the output is clipped to 6 bits and truncated to 8
---! bits.
+--! Finally, the output is clipped to 6 bits and sign-extended
+--! to 8 bits.
 entity output_remapper is
     port (
         clk : in std_logic;

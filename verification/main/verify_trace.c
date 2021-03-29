@@ -124,13 +124,6 @@ int main(int argc, char *argv[]) {
                 r_i_u_0->data[i_u_0], r_i_u_1->data[i_u_1], r_i_u_2->data[i_u_2]
                 );
 
-        // for (int j = 0; j < vcd->signal_count; j++) {
-        //     vcd_signal_t *signal = &vcd->signals[j];
-        //     if (signal->valid[i])
-        //         printf("%s=0x%016lx ", signal->name, signal->data[i]);
-        //     else
-        //         printf("%s=0xXXXXXXXXXXXXXXXX ", signal->name);
-        // }
     }
 
 
