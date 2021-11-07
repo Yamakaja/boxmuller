@@ -32,7 +32,7 @@ entity grng_16 is
 end grng_16;
 
 architecture beh of grng_16 is
-    component boxmueller is
+    component boxmuller is
         port (
             clk  : in std_logic;
             rstn : in std_logic;
@@ -180,7 +180,7 @@ begin
     
     gen_bm:
     for i in 0 to BM_COUNT-1 generate
-        bm : boxmueller
+        bm : boxmuller
             port map (
                 clk  => clk,
                 rstn => resetn,

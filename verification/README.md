@@ -1,11 +1,11 @@
 # Numerical model & Trace verification
 
-This subproject implements a floating point model of the box-mueller transformation, and processes vcds to compare the results with the hardware simulation.
+This subproject implements a floating point model of the box-muller transformation, and processes vcds to compare the results with the hardware simulation.
 
 ### Overview
 
 * `lib`: vcd processing code
-* `main`: Contains all the business logic around box-mueller. Links against `lib`
+* `main`: Contains all the business logic around box-muller. Links against `lib`
 
 ### Building
 

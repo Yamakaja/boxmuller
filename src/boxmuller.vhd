@@ -1,6 +1,6 @@
 --------------------------------------------------------------------------------
 --! @file
---! @brief Box-Mueller transformator
+--! @brief Box-Muller transformator
 --! @author David Winter
 --------------------------------------------------------------------------------
 --! VHDL standard library
@@ -10,7 +10,7 @@ use ieee.std_logic_1164.all;
 --! Fixed width integer primitives
 use ieee.numeric_std.all;
 
---! Implements the box-mueller transformation to create a gaussian distribution
+--! Implements the box-muller transformation to create a gaussian distribution
 --! from uniformly distributed bits.
 --! At the time of writing this documentation, this transform had a throughput
 --! of one output (i.e. two normal variables) per clock cycle, and a pipeline
@@ -21,7 +21,7 @@ use ieee.numeric_std.all;
 --! noise generator using the Box-Muller method and its error analysis," in IEEE
 --! Transactions on Computers, vol. 55, no. 6, pp. 659-671, June 2006,
 --! doi: 10.1109/TC.2006.81.
-entity boxmueller is
+entity boxmuller is
     port ( 
         clk  : in std_logic;                         --! Data clock
         rstn : in std_logic;                         --! Negative reset
@@ -30,9 +30,9 @@ entity boxmueller is
         x_0  : out signed(15 downto 0);              --! First output normal variable   bit value: (5,11)
         x_1  : out signed(15 downto 0)               --! Second output normal variable  bit value: (5,11)
     );
-end boxmueller;
+end boxmuller;
 
-architecture beh of boxmueller is
+architecture beh of boxmuller is
 
     -- Component definitions
     

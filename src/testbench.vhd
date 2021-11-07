@@ -48,7 +48,7 @@ architecture beh of testbench is
     -- signal t_shift_c : signed(5 downto 0)               := to_signed(-16, 6);
     -- signal t_shift_dout : std_logic_vector(31 downto 0) := (others => '0');
     
-    component boxmueller is
+    component boxmuller is
         port ( 
             clk  : in std_logic;
             rstn : in std_logic;
@@ -168,7 +168,7 @@ begin
             dout   => t_dout(63 downto 0)
         );
     
-    bm : boxmueller
+    bm : boxmuller
         port map ( 
             clk  => t_clk,
             rstn => t_rstn,

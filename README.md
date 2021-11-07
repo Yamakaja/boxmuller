@@ -1,11 +1,11 @@
-# Boxmueller
+# Boxmuller
 
-A gaussian random number generator based on the Box-Mueller transform. 
+A gaussian random number generator based on the Box-Muller transform.
 
 ### Project Structure
 
-* `reference/`: Originally a bit-accurate reference implementation of the boxmueller GRNG core. Note: The VHDL implementation has diverged from this reference, and comes with lots of optimizations that are not covered here. Nonetheless, this project should give you a good idea of what's going on.
-* `verification/`: Used to verify simulation VCDs of a boxmueller core
+* `reference/`: Originally a bit-accurate reference implementation of the boxmuller GRNG core. Note: The VHDL implementation has diverged from this reference, and comes with lots of optimizations that are not covered here. Nonetheless, this project should give you a good idea of what's going on.
+* `verification/`: Used to verify simulation VCDs of a boxmuller core
 * `src/`: All VHDL source files
 * `vivado/`: Vivado TCL scripts to configure the project
 * `docs/`: Run `doxygen` to generate code documentation. This directory is not tracked by git
@@ -20,15 +20,15 @@ Configure `vivado/create_project.tcl` to suit your needs:
 # ADJUST THESE VALUES:
 #
 # Root of this git repository
-set source_dir "/home/$user/fpga/vhdl/boxmueller"
+set source_dir "/home/$user/fpga/vhdl/boxmuller"
 # Vivado project location
-set project_location "/home/$user/fpga/vivado/boxmueller"
+set project_location "/home/$user/fpga/vivado/boxmuller"
 ```
 
 Open the Vivado quickstart screen and source the tcl script.
 
 ```
-source $boxmueller/vivado/create_project.tcl
+source $boxmuller/vivado/create_project.tcl
 ```
 
 The project can now be simulated, synthesized and implemented. Currently only behavioural simulation is tested.
@@ -36,7 +36,7 @@ The project can now be simulated, synthesized and implemented. Currently only be
 ## Verifying simulation results
 
 ```
-cd $boxmueller/verification
+cd $boxmuller/verification
 # Create a build directory
 mkdir build
 cd build
@@ -59,7 +59,7 @@ close_vcd
 
 In the verification build directory:
 ```
-main/verify_trace $vivado_project_dir/boxmueller.sim/sim_1/behav/xsim/dump.vcd | sort -rn | head
+main/verify_trace $vivado_project_dir/boxmuller.sim/sim_1/behav/xsim/dump.vcd | sort -rn | head
 ```
 
 The first column is the interesting one - it is the absolute difference beetween the hardware result and a 64-bit floating point calculation.

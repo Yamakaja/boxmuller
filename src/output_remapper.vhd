@@ -1,6 +1,6 @@
 --------------------------------------------------------------------------------
 --! @file
---! @brief Bux-Mueller output remapper/scaler
+--! @brief Bux-Muller output remapper/scaler
 --! @author David Winter
 --------------------------------------------------------------------------------
 --! VHDL standard library

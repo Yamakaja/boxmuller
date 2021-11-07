@@ -1,7 +1,7 @@
-# Fixed Point Box Mueller Reference Implementation
+# Fixed Point Box-Muller Reference Implementation
 
 This codebase aims to supply a bit-correct reference implementation of the
-xoroshiro128plus and box-mueller VHDL ip cores in the parent project.
+xoroshiro128plus and box-muller VHDL ip cores in the parent project.
 
 ### Overview
 
@@ -9,7 +9,7 @@ The project is split into three relevant directories:
 
 * `lib`: Contains utilities like the xoroshiro128plus URNG, a `fxpnt_t` that allows for easier handling of fixed point arithmetic, and more.
 * `test`: This directory is dedicated to unit tests that (attempt to) veryify correct behaviour of the components in `lib`. Links against `lib`.
-* `main`: Contains all the business logic around box-mueller. Also links against `lib`.
+* `main`: Contains all the business logic around box-muller. Also links against `lib`.
 
 ### Building
 
