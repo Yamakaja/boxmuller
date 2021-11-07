@@ -1,1 +1,7 @@
 docs/
+boxmuller.*/
+vivado.*
+boxmuller_ip.log
+*.xpr
+xgui/
+component.xml
