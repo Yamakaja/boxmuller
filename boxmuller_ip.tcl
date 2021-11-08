@@ -19,6 +19,14 @@ set_property "top" "grng_16" [get_filesets sources_1]
 
 adi_ip_properties_lite boxmuller
 
+ipx::infer_bus_interface {\
+    s_axis_tready \
+    s_axis_tvalid \
+    s_axis_tdata } xilinx.com:interface:axis_rtl:1.0 [ipx::current_core]
+
+ipx::infer_bus_interface clk xilinx.com:signal:clock_rtl:1.0 [ipx::current_core]
+ipx::infer_bus_interface resetn xilinx.com:signal:reset_rtl:1.0 [ipx::current_core]
+
 # adi_ip_ttcl boxmuller "boxmuller_constr.ttcl"
 
 set_property display_name "Box-Muller GRNG" [ipx::current_core]
