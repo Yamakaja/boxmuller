@@ -7,6 +7,7 @@
 library ieee;
 --! Logic primitives and vectors
 use ieee.std_logic_1164.all;
+use ieee.std_logic_misc.or_reduce;
 --! Fixed width integer primitives
 use ieee.numeric_std.all;
 --! Import pre-calculated xoroshiro seeds
@@ -26,8 +27,8 @@ entity grng_16 is
         s_axis_tready   : in std_logic;                                 --! AXI Stream Ready In
         s_axis_tvalid   : out std_logic;                                --! AXI Stream Valid Out
         
-        sb_din  : in std_logic;                                         --! Shiftbus Data In
-        sb_en   : in std_logic                                          --! Shiftbus Enable
+        factor  : in std_logic_vector(15 downto 0);                     --! sigma of normal distribution
+        offset  : in std_logic_vector( 7 downto 0)                     --! mu    of normal distribution
     );
 end grng_16;
 
@@ -67,20 +68,6 @@ architecture beh of grng_16 is
         );
     end component;
     
-    component sb_des is
-        generic (
-            DEPTH : integer := 24
-        );
-        port (
-            clk     : in std_logic;
-            rstn    : in std_logic;
-            sb_data : in std_logic;
-            sb_en   : in std_logic;
-            dout    : out std_logic_vector(DEPTH - 1 downto 0);
-            updated : out std_logic
-        );
-    end component;
-    
     component bm_axis_gen is
         generic (
             COUNTER_WIDTH : integer := 6
@@ -103,22 +90,31 @@ architecture beh of grng_16 is
     constant XORO_OUT_WIDTH : integer :=    64;
     constant XORO_COUNT     : integer :=    BM_IN_WIDTH * BM_COUNT / XORO_OUT_WIDTH;
     
-    constant SB_FAC_WIDTH   : integer := 16;
-    constant SB_OFF_WIDTH   : integer := 8;
-    
     signal w_xoro_data      : std_logic_vector(XORO_COUNT * XORO_OUT_WIDTH - 1 downto 0);
     
     type w_bm_out_t is array(2 * BM_COUNT - 1 downto 0) of signed(15 downto 0);
     signal w_bm_out         : w_bm_out_t;
     
-    signal w_sb_data : std_logic_vector(23 downto 0);
-    signal w_updated : std_logic;
+    signal r_updated        : std_logic;
+    signal r_factor_d       : std_logic_vector(15 downto 0);
+    signal r_offset_d       : std_logic_vector( 7 downto 0);
+    signal w_sub_en         : std_logic;
     
-    signal w_sub_en : std_logic;
-    
-    signal w_remapped : signed(2 * BM_COUNT * 8 - 1 downto 0);
+    signal w_remapped       : signed(2 * BM_COUNT * 8 - 1 downto 0);
     
 begin
+
+    update_detector : process (clk, resetn)
+    begin
+        if resetn = '0' then
+            r_updated <= '0';
+        elsif rising_edge(clk) then
+            r_factor_d <= factor;
+            r_offset_d <= offset;
+
+            r_updated <= or_reduce(factor xor r_factor_d) or or_reduce(offset xor r_offset_d);
+        end if;
+    end process;
 
     axis_gen : bm_axis_gen
         generic map (
@@ -128,7 +124,7 @@ begin
             clk             => clk,
             rstn            => resetn,
             en              => en,
-            updated         => w_updated,
+            updated         => r_updated,
             din             => std_logic_vector(w_remapped),
             s_axis_tready   => s_axis_tready,
             s_axis_tvalid   => s_axis_tvalid,
@@ -136,19 +132,6 @@ begin
             sub_en          => w_sub_en
         );
 
-    sb : sb_des
-        generic map (
-            DEPTH => SB_FAC_WIDTH + SB_OFF_WIDTH
-        )
-        port map (
-            clk     => clk,
-            rstn    => resetn,
-            sb_data => sb_din,
-            sb_en   => sb_en,
-            dout    => w_sb_data,
-            updated => w_updated
-        );
-    
     gen_remapper:
     for i in 0 to 2*BM_COUNT-1 generate
         out_remap : output_remapper
@@ -157,8 +140,8 @@ begin
                 rstn    => resetn,
                 en      => w_sub_en,
                 din     => w_bm_out(i),
-                factor  => signed(w_sb_data(SB_FAC_WIDTH + SB_OFF_WIDTH - 1 downto SB_OFF_WIDTH)),
-                offset  => signed(w_sb_data(SB_OFF_WIDTH - 1 downto 0)),
+                factor  => signed(factor),
+                offset  => signed(offset),
                 dout    => w_remapped((i+1)*8-1 downto i*8)
             );
     end generate;

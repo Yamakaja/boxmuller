@@ -229,7 +229,7 @@ begin
                 end if;
             end if;
         end if;
-    end process run;
+    end process;
     
     p <= unsigned(r_p);
     v <= r_v;
@@ -276,7 +276,7 @@ begin
                 end if;
             end if;
         end if;
-    end process run;
+    end process;
     
     p <= unsigned(r_p);
 end beh;
