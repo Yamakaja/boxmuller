@@ -41,7 +41,7 @@ begin
     begin
         if rstn = '0' then
             r_valid_counter <= (others => '0');
-        elsif rising_edge(clk) then
+        elsif rising_edge(clk) and en = '1' then
             if updated = '1' then
                  r_valid_counter <= (others => '0');
              elsif w_input_valid = '0' then

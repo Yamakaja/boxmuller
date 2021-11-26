@@ -60,7 +60,8 @@ begin
             r_1_offset <= r_0_offset;
             
             r_2_y <= r_1_din * r_1_factor;
-            r_2_offset <= (others => '0');
+            r_2_offset(r_2_offset'length-1 downto 17) <= (others => r_1_offset(7));
+            r_2_offset(16 downto 0) <= (others => '0');
             r_2_offset(17 + r_1_offset'length-1 downto 17) <= r_1_offset;
             
             r_3_y <= r_2_y + r_2_offset;
