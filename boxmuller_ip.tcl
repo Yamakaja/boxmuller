@@ -3,7 +3,6 @@ source $ad_hdl_dir/library/scripts/adi_ip_xilinx.tcl
 
 adi_ip_create boxmuller
 adi_ip_files boxmuller [list \
-    "./src/bm_axis_gen.vhd" \
     "./src/boxmuller.vhd" \
     "./src/grng_16.vhd" \
     "./src/lzd.vhd" \
@@ -20,12 +19,6 @@ adi_ip_files boxmuller [list \
 set_property "top" "grng_16" [get_filesets sources_1]
 
 adi_ip_properties_lite boxmuller
-
-ipx::infer_bus_interface {\
-    m_axis_tready \
-    m_axis_tvalid \
-    m_axis_tdata  \
-    m_axis_tlast } xilinx.com:interface:axis_rtl:1.0 [ipx::current_core]
 
 ipx::infer_bus_interface clk xilinx.com:signal:clock_rtl:1.0 [ipx::current_core]
 ipx::infer_bus_interface resetn xilinx.com:signal:reset_rtl:1.0 [ipx::current_core]

@@ -22,16 +22,10 @@ entity grng_16 is
         clk         : in std_logic;                                     --! Clock in
         resetn      : in std_logic;                                     --! Inverted Reset
         en          : in std_logic;                                     --! Enable
+        data        : out std_logic_vector(8*16 - 1 downto 0);          --! Remapped data output
         
-        m_axis_tdata    : out std_logic_vector(8 * 16 - 1 downto 0);    --! AXI Stream Data Out
-        m_axis_tready   : in std_logic;                                 --! AXI Stream Ready In
-        m_axis_tvalid   : out std_logic;                                --! AXI Stream Valid Out
-        m_axis_tlast    : out std_logic;                                --! AXI Stream Last Out
-        
-        factor_in   : in std_logic_vector(15 downto 0);                 --! sigma of normal distribution
-        offset_in   : in std_logic_vector( 7 downto 0);                 --! mu    of normal distribution
-        din_beats   : in std_logic_vector(15 downto 0)
-        
+        factor      : in std_logic_vector(15 downto 0);                 --! sigma of normal distribution
+        offset      : in std_logic_vector( 7 downto 0);                 --! mu    of normal distribution
     );
 end grng_16;
 
@@ -85,28 +79,6 @@ architecture beh of grng_16 is
             );
     end component output_remapper_fixpt;
     
-    component bm_axis_gen is
-        generic (
-            COUNTER_WIDTH : integer := 6
-        );
-        port (
-            clk             : in std_logic;
-            rstn            : in std_logic;
-            en              : in std_logic;
-            factor_in       : in  unsigned(15 downto 0);
-            factor_out      : out unsigned(15 downto 0);
-            offset_in       : in  signed(7 downto 0);
-            offset_out      : out signed(7 downto 0);
-            din             : in  std_logic_vector(127 downto 0);
-            din_beats       : in  unsigned(15 downto 0);
-            m_axis_tready   : in std_logic;
-            m_axis_tvalid   : out std_logic;
-            m_axis_tdata    : out std_logic_vector(127 downto 0);
-            m_axis_tlast    : out std_logic;
-            sub_en          : out std_logic
-        );
-    end component bm_axis_gen;
-    
     constant BM_IN_WIDTH    : integer :=    96;
     constant BM_COUNT       : integer :=    8;
     constant XORO_OUT_WIDTH : integer :=    64;
@@ -123,32 +95,9 @@ architecture beh of grng_16 is
     signal w_sub_en         : std_logic;
     
     signal w_remapped       : signed(2 * BM_COUNT * 8 - 1 downto 0);
-
-    signal factor           : unsigned(15 downto 0);
-    signal offset           : signed(7 downto 0);
-    
 begin
 
-    axis_gen : bm_axis_gen
-        generic map (
-            COUNTER_WIDTH   => 6
-        )
-        port map (
-            clk             => clk,
-            rstn            => resetn,
-            en              => en,
-            factor_in       => unsigned(factor_in),
-            factor_out      => factor,
-            offset_in       => signed(offset_in),
-            offset_out      => offset,
-            din             => std_logic_vector(w_remapped),
-            din_beats       => unsigned(din_beats),
-            m_axis_tready   => m_axis_tready,
-            m_axis_tvalid   => m_axis_tvalid,
-            m_axis_tdata    => m_axis_tdata,
-            m_axis_tlast    => m_axis_tlast,
-            sub_en          => w_sub_en
-        );
+    data <= std_logic_vector(w_remapped);
 
     gen_remapper:
     for i in 0 to 2*BM_COUNT-1 generate
