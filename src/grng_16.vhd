@@ -25,7 +25,7 @@ entity grng_16 is
         data        : out std_logic_vector(8*16 - 1 downto 0);          --! Remapped data output
         
         factor      : in std_logic_vector(15 downto 0);                 --! sigma of normal distribution
-        offset      : in std_logic_vector( 7 downto 0);                 --! mu    of normal distribution
+        offset      : in std_logic_vector( 7 downto 0)                  --! mu    of normal distribution
     );
 end grng_16;
 
@@ -92,7 +92,6 @@ architecture beh of grng_16 is
     signal r_updated        : std_logic;
     signal r_factor_d       : std_logic_vector(15 downto 0);
     signal r_offset_d       : std_logic_vector( 7 downto 0);
-    signal w_sub_en         : std_logic;
     
     signal w_remapped       : signed(2 * BM_COUNT * 8 - 1 downto 0);
 begin
@@ -106,7 +105,7 @@ begin
             port map (
                 clk     => clk,
                 rstn    => resetn,
-                en      => w_sub_en,
+                en      => en,
                 x_in    => w_bm_out(i),
                 factor  => unsigned(factor),
                 offset  => signed(offset),
@@ -125,7 +124,7 @@ begin
             port map (
                 clk    => clk,
                 rstn   => resetn,
-                enable => w_sub_en,
+                enable => en,
                 dout   => w_xoro_data((i+1)*XORO_OUT_WIDTH - 1 downto i*XORO_OUT_WIDTH)
             );
     end generate gen_rand;
@@ -136,7 +135,7 @@ begin
             port map (
                 clk  => clk,
                 rstn => resetn,
-                en   => w_sub_en,
+                en   => en,
                 u    => w_xoro_data((i+1)*BM_IN_WIDTH - 1 downto i * BM_IN_WIDTH),
                 x_0  => w_bm_out(2*i + 0),
                 x_1  => w_bm_out(2*i + 1)

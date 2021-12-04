@@ -9,6 +9,7 @@ A gaussian random number generator based on the Box-Muller transform.
 * `src/`: All VHDL source files
 * `vivado/`: Vivado TCL scripts to configure the project
 * `docs/`: Run `doxygen` to generate code documentation. This directory is not tracked by git
+* `codegen/`: Some parts of the design were generated using MATLAB HDL Coder, you'll find the source .m files here
 
 ## Building the core
 

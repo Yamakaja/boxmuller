@@ -1,3 +1,5 @@
+-- Generated from MATLAB
+
 LIBRARY IEEE;
 USE IEEE.std_logic_1164.ALL;
 USE IEEE.numeric_std.ALL;
@@ -50,12 +52,12 @@ ARCHITECTURE rtl OF output_remapper_fixpt IS
 BEGIN
   enb <= en;
 
-  r_1_reg_process : PROCESS (clk, rstn)
+  r_1_reg_process : PROCESS (clk)
   BEGIN
-    IF rstn = '0' THEN
-      r_1_reg_reg <= (OTHERS => to_signed(16#0000#, 16));
-    ELSIF rising_edge(clk) THEN
-      IF enb = '1' THEN
+    IF rising_edge(clk) THEN
+      IF rstn = '0' THEN
+        r_1_reg_reg <= (OTHERS => to_signed(16#0000#, 16));
+      ELSIF enb = '1' THEN
         r_1_reg_reg(0) <= x_in;
         r_1_reg_reg(1) <= r_1_reg_reg(0);
       END IF;
@@ -64,12 +66,12 @@ BEGIN
 
   r_1 <= r_1_reg_reg(1);
 
-  factor_reg_process : PROCESS (clk, rstn)
+  factor_reg_process : PROCESS (clk)
   BEGIN
-    IF rstn = '0' THEN
-      factor_1 <= to_unsigned(16#0000#, 16);
-    ELSIF rising_edge(clk) THEN
-      IF enb = '1' THEN
+    IF rising_edge(clk) THEN
+      IF rstn = '0' THEN
+        factor_1 <= to_unsigned(16#0000#, 16);
+      ELSIF enb = '1' THEN
         factor_1 <= factor;
       END IF;
     END IF;
@@ -84,24 +86,24 @@ BEGIN
       p22tmp_mul_temp(31 DOWNTO 0);
   tmp <= (resize(p22tmp_cast_1(31 DOWNTO 17), 16)) + ('0' & p22tmp_cast_1(16));
 
-  r_2_reg_process : PROCESS (clk, rstn)
+  r_2_reg_process : PROCESS (clk)
   BEGIN
-    IF rstn = '0' THEN
-      r_2 <= to_signed(16#0000#, 16);
-    ELSIF rising_edge(clk) THEN
-      IF enb = '1' THEN
+    IF rising_edge(clk) THEN
+      IF rstn = '0' THEN
+        r_2 <= to_signed(16#0000#, 16);
+      ELSIF enb = '1' THEN
         r_2 <= tmp;
       END IF;
     END IF;
   END PROCESS r_2_reg_process;
 
 
-  offset_reg_process : PROCESS (clk, rstn)
+  offset_reg_process : PROCESS (clk)
   BEGIN
-    IF rstn = '0' THEN
-      offset_1 <= to_signed(16#00#, 8);
-    ELSIF rising_edge(clk) THEN
-      IF enb = '1' THEN
+    IF rising_edge(clk) THEN
+      IF rstn = '0' THEN
+        offset_1 <= to_signed(16#00#, 8);
+      ELSIF enb = '1' THEN
         offset_1 <= offset;
       END IF;
     END IF;
@@ -119,12 +121,12 @@ BEGIN
   -- HDL code generation from MATLAB function: output_remapper_fixpt
   -- 
   -- HDL code generation from MATLAB function: output_remapper_fixpt_falseregionp10
-  r_3_reg_process : PROCESS (clk, rstn)
+  r_3_reg_process : PROCESS (clk)
   BEGIN
-    IF rstn = '0' THEN
-      r_3 <= to_signed(16#0000#, 16);
-    ELSIF rising_edge(clk) THEN
-      IF enb = '1' THEN
+    IF rising_edge(clk) THEN
+      IF rstn = '0' THEN
+        r_3 <= to_signed(16#0000#, 16);
+      ELSIF enb = '1' THEN
         r_3 <= tmp_1;
       END IF;
     END IF;
@@ -138,12 +140,12 @@ BEGIN
   -- HDL code generation from MATLAB function: output_remapper_fixpt_trueregionp10
   ex <= to_signed(-16#001E#, 16);
 
-  delayMatch_process : PROCESS (clk, rstn)
+  delayMatch_process : PROCESS (clk)
   BEGIN
-    IF rstn = '0' THEN
-      ex_1 <= to_signed(16#0000#, 16);
-    ELSIF rising_edge(clk) THEN
-      IF enb = '1' THEN
+    IF rising_edge(clk) THEN
+      IF rstn = '0' THEN
+        ex_1 <= to_signed(16#0000#, 16);
+      ELSIF enb = '1' THEN
         ex_1 <= ex;
       END IF;
     END IF;
@@ -162,12 +164,12 @@ BEGIN
   -- HDL code generation from MATLAB function: output_remapper_fixpt_trueregionp5
   ex_2 <= to_signed(16#001E#, 16);
 
-  delayMatch_1_process : PROCESS (clk, rstn)
+  delayMatch_1_process : PROCESS (clk)
   BEGIN
-    IF rstn = '0' THEN
-      ex_3 <= to_signed(16#0000#, 16);
-    ELSIF rising_edge(clk) THEN
-      IF enb = '1' THEN
+    IF rising_edge(clk) THEN
+      IF rstn = '0' THEN
+        ex_3 <= to_signed(16#0000#, 16);
+      ELSIF enb = '1' THEN
         ex_3 <= ex_2;
       END IF;
     END IF;
@@ -183,12 +185,12 @@ BEGIN
       "100000" WHEN (tmp_5(15) = '1') AND (tmp_5(14 DOWNTO 5) /= "1111111111") ELSE
       tmp_5(5 DOWNTO 0);
 
-  r_5_reg_process : PROCESS (clk, rstn)
+  r_5_reg_process : PROCESS (clk)
   BEGIN
-    IF rstn = '0' THEN
-      r_5_reg_reg <= (OTHERS => to_signed(16#00#, 6));
-    ELSIF rising_edge(clk) THEN
-      IF enb = '1' THEN
+    IF rising_edge(clk) THEN
+      IF rstn = '0' THEN
+        r_5_reg_reg <= (OTHERS => to_signed(16#00#, 6));
+      ELSIF enb = '1' THEN
         r_5_reg_reg(0) <= tmp_6;
         r_5_reg_reg(1) <= r_5_reg_reg(0);
       END IF;
@@ -199,12 +201,12 @@ BEGIN
 
   y_out_1 <= resize(r_5, 8);
 
-  y_out_reg_process : PROCESS (clk, rstn)
+  y_out_reg_process : PROCESS (clk)
   BEGIN
-    IF rstn = '0' THEN
-      y_out <= to_signed(16#00#, 8);
-    ELSIF rising_edge(clk) THEN
-      IF enb = '1' THEN
+    IF rising_edge(clk) THEN
+      IF rstn = '0' THEN
+        y_out <= to_signed(16#00#, 8);
+      ELSIF enb = '1' THEN
         y_out <= y_out_1;
       END IF;
     END IF;

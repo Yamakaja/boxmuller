@@ -210,15 +210,15 @@ architecture beh of lzd_32 is
     signal r_v : std_logic;
 begin
 
-    process (rstn, clk)
+    process (clk)
         variable v_p : std_logic_vector(4 downto 0);
         variable v_v : std_logic;
     begin
-        if rstn = '0' then
-            r_p <= (others => '0');
-            r_v <= '0';
-        elsif rising_edge(clk) then
-            if en = '1' then
+        if rising_edge(clk) then
+            if rstn = '0' then
+                r_p <= (others => '0');
+                r_v <= '0';
+            elsif en = '1' then
                 lzdp_32(din, v_p, v_v);
                 r_v <= v_v;
                 
@@ -260,14 +260,14 @@ end lzd_48;
 architecture beh of lzd_48 is
     signal r_p : std_logic_vector(5 downto 0);
 begin
-    process (rstn, clk)
+    process (clk)
         variable v_p : std_logic_vector(5 downto 0);
         variable v_v : std_logic;
     begin
-        if rstn = '0' then
-            r_p <= (others => '0');
-        elsif rising_edge(clk) then
-            if en = '1' then
+        if rising_edge(clk) then
+            if rstn = '0' then
+                r_p <= (others => '0');
+            elsif en = '1' then
                 lzdp_48(din, v_p, v_v);
                 if v_v = '1' then
                     r_p <= v_p;

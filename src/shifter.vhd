@@ -57,12 +57,12 @@ begin
 
     preprocessing: process(clk, rstn)
     begin
-        if rstn = '0' then
-            r_data <= (others => '0');
-            r_neg <= '0';
-            r_c <= (others => '0');
-        elsif rising_edge(clk) then
-            if en = '1' then
+        if rising_edge(clk) then
+            if rstn = '0' then
+                r_data <= (others => '0');
+                r_neg <= '0';
+                r_c <= (others => '0');
+            elsif en = '1' then
                 if c(CONTROL_WIDTH - 1) = '0' then
                     r_data <= din;
                     r_c <= unsigned(std_logic_vector(c)) srl C_SHIFT;
@@ -78,11 +78,11 @@ begin
     
     shift : process(clk, rstn)
     begin
-        if rstn = '0' then
-            r_data_0 <= (others => '0');
-            r_neg_0 <= '0';
-        elsif rising_edge(clk) then
-            if en = '1' then
+        if rising_edge(clk) then
+            if rstn = '0' then
+                r_data_0 <= (others => '0');
+                r_neg_0 <= '0';
+            elsif en = '1' then
                 r_neg_0 <= r_neg;
                 r_data_0 <= std_logic_vector(unsigned(r_data) sll to_integer(r_c));
             end if;
@@ -91,10 +91,10 @@ begin
     
     postprocessing: process(clk, rstn)
     begin
-        if rstn = '0' then
-            r_dout <= (others => '0');
-        elsif rising_edge(clk) then
-            if en = '1' then
+        if rising_edge(clk) then
+            if rstn = '0' then
+                r_dout <= (others => '0');
+            elsif en = '1' then
                 if r_neg_0 = '0' then
                     r_dout <= r_data_0;
                 else

@@ -48,7 +48,7 @@ begin
 
     dout <= r_5_y;
 
-    process (clk, rstn)
+    process (clk)
     begin
         if rising_edge(clk) and en = '1' then
             r_0_din <= din;

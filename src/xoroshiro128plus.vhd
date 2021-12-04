@@ -32,13 +32,15 @@ begin
   ctrl : process (clk, rstn)
     variable s_1n : std_logic_vector(63 downto 0);
   begin
-    if rstn = '0' then
-      s_0 <= std_logic_vector(seed_0);
-      s_1 <= std_logic_vector(seed_1);
-    elsif rising_edge(clk) and enable = '1' then
-      s_1n := s_1 xor s_0;
-      s_0  <= std_logic_vector((unsigned(s_0) rol 24) xor unsigned(s_1n) xor (unsigned(s_1n) sll 16));
-      s_1  <= std_logic_vector(unsigned(s_1n) rol 37);
+    if rising_edge(clk) then
+      if rstn = '0' then
+        s_0 <= std_logic_vector(seed_0);
+        s_1 <= std_logic_vector(seed_1);
+      elsif enable = '1' then
+        s_1n := s_1 xor s_0;
+        s_0  <= std_logic_vector((unsigned(s_0) rol 24) xor unsigned(s_1n) xor (unsigned(s_1n) sll 16));
+        s_1  <= std_logic_vector(unsigned(s_1n) rol 37);
+      end if;
     end if;
   end process ctrl;
 

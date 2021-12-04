@@ -25,7 +25,7 @@ entity boxmuller is
     port ( 
         clk  : in std_logic;                         --! Data clock
         rstn : in std_logic;                         --! Negative reset
-        en   : in std_logic;                         --! Clock enable (WIP / broken)
+        en   : in std_logic;                         --! Clock enable
         u    : in std_logic_vector(95 downto 0);     --! Uniform random input
         x_0  : out signed(15 downto 0);              --! First output normal variable   bit value: (5,11)
         x_1  : out signed(15 downto 0)               --! Second output normal variable  bit value: (5,11)
