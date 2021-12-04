@@ -1,10 +1,8 @@
 LIBRARY_NAME = boxmuller
 
-GENERIC_DEPS += ./src/bm_axis_gen.vhd
 GENERIC_DEPS += ./src/boxmuller.vhd
 GENERIC_DEPS += ./src/grng_16.vhd
 GENERIC_DEPS += ./src/lzd.vhd
-GENERIC_DEPS += ./src/output_remapper.vhd
 GENERIC_DEPS += ./src/output_remapper_fixpt.vhd
 GENERIC_DEPS += ./src/output_remapper_fixpt_pkg.vhd
 GENERIC_DEPS += ./src/pp_fcn.vhd

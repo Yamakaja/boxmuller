@@ -6,7 +6,6 @@ adi_ip_files boxmuller [list \
     "./src/boxmuller.vhd" \
     "./src/grng_16.vhd" \
     "./src/lzd.vhd" \
-    "./src/output_remapper.vhd" \
     "./src/output_remapper_fixpt.vhd" \
     "./src/output_remapper_fixpt_pkg.vhd" \
     "./src/pp_fcn.vhd" \
