@@ -89,10 +89,6 @@ architecture beh of grng_16 is
     type w_bm_out_t is array(2 * BM_COUNT - 1 downto 0) of signed(15 downto 0);
     signal w_bm_out         : w_bm_out_t;
     
-    signal r_updated        : std_logic;
-    signal r_factor_d       : std_logic_vector(15 downto 0);
-    signal r_offset_d       : std_logic_vector( 7 downto 0);
-    
     signal w_remapped       : signed(2 * BM_COUNT * 8 - 1 downto 0);
 begin
 
