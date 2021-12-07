@@ -66,19 +66,6 @@ architecture beh of grng_16 is
         );
     end component;
 
-    component output_remapper_fixpt is
-        port (
-             clk            : in std_logic;
-            rstn            : in std_logic;
-            en              : in std_logic;
-            x_in            : in signed(15 downto 0);  -- sfix16_En11
-            factor          : in unsigned(15 downto 0);  -- ufix16_En8
-            offset          : in signed(7 downto 0);  -- sfix8_En2
-            ce_out          : out std_logic;
-            y_out           : out signed(7 downto 0)  -- sfix8_En2
-            );
-    end component output_remapper_fixpt;
-    
     constant BM_IN_WIDTH    : integer :=    96;
     constant BM_COUNT       : integer :=    8;
     constant XORO_OUT_WIDTH : integer :=    64;
@@ -96,18 +83,16 @@ begin
 
     gen_remapper:
     for i in 0 to 2*BM_COUNT-1 generate
-
-        out_remap_fixpt : output_remapper_fixpt
+        out_remapper : output_remapper
             port map (
                 clk     => clk,
                 rstn    => resetn,
                 en      => en,
-                x_in    => w_bm_out(i),
-                factor  => unsigned(factor),
+                din     => w_bm_out(i),
+                factor  => signed(factor),
                 offset  => signed(offset),
-                y_out   => w_remapped((i+1)*8-1 downto i*8)
+                dout    => w_remapped((i+1)*8-1 downto i*8)
             );
-
     end generate;
 
     gen_rand:
