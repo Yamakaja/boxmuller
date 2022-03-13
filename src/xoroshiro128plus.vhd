@@ -29,7 +29,7 @@ begin
 
   dout <= std_logic_vector(unsigned(s_0) + unsigned(s_1));
 
-  ctrl : process (clk, rstn)
+  ctrl : process (clk)
     variable s_1n : std_logic_vector(63 downto 0);
   begin
     if rising_edge(clk) then
